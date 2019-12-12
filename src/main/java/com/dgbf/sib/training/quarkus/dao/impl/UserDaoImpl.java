@@ -9,6 +9,7 @@ import com.dgbf.sib.training.quarkus.model.User;
 import com.sun.media.jfxmedia.logging.Logger;
 
 import javax.enterprise.context.ApplicationScoped;
+import javax.xml.ws.Response;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -63,6 +64,7 @@ public class UserDaoImpl implements UserDao {
             throw new UserExistException("Le login " + user.getLogin() + " existe déja");
         }
     }
+
 
 //    @Override
 //    public Boolean delete(User user) throws UserNotExistException{

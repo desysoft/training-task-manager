@@ -46,11 +46,11 @@ public  class  AbstractDaoT<T> {
             do {
                 isExist = false;
                 for (T t : lst) {
-                    if (t.getId() == nextId) {
-                        isExist = true;
-                        nextId++;
-                        break;
-                    }
+//                    if (t.getId() == nextId) {
+//                        isExist = true;
+//                        nextId++;
+//                        break;
+//                    }
                 }
 
             } while (isExist == true);

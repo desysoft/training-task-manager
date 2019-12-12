@@ -13,7 +13,11 @@ import com.dgbf.sib.training.quarkus.model.User;
 
 import javax.inject.Inject;
 import javax.ws.rs.*;
+import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
+import javax.ws.rs.core.UriBuilder;
+import java.net.URI;
 import java.util.List;
 
 @Path("/user")
@@ -43,6 +47,7 @@ public class UserResource {
         }
     }
 
+
     @GET
     @Produces(MediaType.APPLICATION_JSON)
     @Path("/findByLogin/{login}")
@@ -52,17 +57,35 @@ public class UserResource {
         else throw new UtilisateursNonTrouveException("Ce login est inexistant");
     }
 
+//    @POST
+//    @Produces(MediaType.APPLICATION_JSON)
+//    @Path("/add")
+//    public User ajouterUtilisateur(User user){
+//        try {
+//            return userDao.save(user);
+//        }catch (UserNotCreateException | UserExistException e){
+//            System.out.println(e.getMessage());
+//            return null;
+//        }
+//    }
+
     @POST
     @Produces(MediaType.APPLICATION_JSON)
     @Path("/add")
-    public User ajouterUtilisateur(User user){
+    public Response ajouterUtilisateur(User user){
         try {
-            return userDao.save(user);
+            if(userDao.save(user)!=null){
+                URI oUri = UriBuilder.fromPath("/user").path("{id}").build(user.getId());
+                return Response.created(oUri).build();
+            }else {
+                return Response.noContent().build();
+            }
         }catch (UserNotCreateException | UserExistException e){
             System.out.println(e.getMessage());
-            return null;
+            return Response.noContent().build();
         }
     }
+
 
     @PUT
     @Produces(MediaType.APPLICATION_JSON)
