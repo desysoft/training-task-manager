@@ -1,17 +1,25 @@
 package com.dgbf.sib.training.quarkus.model;
 
+import javax.persistence.*;
 import java.time.LocalDate;
 
+@Entity
+@Table(name = "t_activity")
 public class Activity {
 
-    private int id;
+    @Id
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "t_activity_id_seq")
+    private Integer id;
     private String code;
     private String label;
     private String description;
     private LocalDate start_date;
     private LocalDate end_date;
-    private String statut;
+    private String status;
+    private LocalDate dt_created;
+    private LocalDate dt_updated;
 
+    @ManyToOne
     private Task OTask;
 
     public Activity() {
@@ -73,11 +81,11 @@ public class Activity {
     }
 
     public String getStatut() {
-        return statut;
+        return status;
     }
 
     public void setStatut(String statut) {
-        this.statut = statut;
+        this.status = statut;
     }
 
     public void setEnd_date(LocalDate end_date) {
@@ -90,6 +98,22 @@ public class Activity {
 
     public void setOTask(Task OTask) {
         this.OTask = OTask;
+    }
+
+    public LocalDate getDt_created() {
+        return dt_created;
+    }
+
+    public void setDt_created(LocalDate dt_created) {
+        this.dt_created = dt_created;
+    }
+
+    public LocalDate getDt_updated() {
+        return dt_updated;
+    }
+
+    public void setDt_updated(LocalDate dt_updated) {
+        this.dt_updated = dt_updated;
     }
 
     @Override

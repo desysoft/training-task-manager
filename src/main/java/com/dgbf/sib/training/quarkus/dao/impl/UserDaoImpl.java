@@ -96,6 +96,19 @@ public class UserDaoImpl implements UserDao {
         } else throw new UserNotExistException("Ce utilisateur d'Id : " + user.getId() + " n'existe pas");
     }
 
+//    @Override
+//    public Boolean assignateTasksToUser(List<Task> lstTasks, User user) throws UserNotExistException {
+//        User oUser = this.findById(user.getId());
+//        if (oUser != null) {
+//            int index = users.indexOf(user);
+//            oUser.getLstTasks().addAll(lstTasks);
+//            users.add(index, oUser);
+//            return true;
+//        } else {
+//            throw new UserExistException("Cet utilsateur n'existe pas");
+//        }
+//    }
+
     @Override
     public Boolean assignateTasksToUser(List<Task> lstTasks, User user) throws UserNotExistException {
         User oUser = this.findById(user.getId());

@@ -1,29 +1,53 @@
 package com.dgbf.sib.training.quarkus.model;
 
+import javax.persistence.*;
+import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.List;
 
+
+@Entity
+@Table(name = "t_task")
 public class Task {
 
 
-    private int id;
+    @Id
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "t_task_id_seq")
+    private Integer id;
     private String code;
     private String name;
     private String description;
-    private float NbrEstimateHours;
-    private User user;
+    private float nbrEstimateHours;
+    private String status;
 
+    @ManyToOne
+    private User OUser;
+    private LocalDate dt_created;
+    private LocalDate dt_updated;
+
+    @OneToMany(mappedBy = "OTask")
     private List<Activity> lstActivities;
 
     public Task() {
     }
 
-    public Task(int id, String code, String name, String description, float NbrEstimateHours, User user) {
+    public Task(int id, String code, String name, String description, float nbrEstimateHours) {
         this.id = id;
         this.code = code;
         this.name = name;
         this.description = description;
-        this.NbrEstimateHours = NbrEstimateHours;
-        this.user = user;
+        this.nbrEstimateHours = nbrEstimateHours;
+        lstActivities = new ArrayList<>();
+    }
+
+    public Task(int id, String code, String name, String description, float nbrEstimateHours, User OUser) {
+        this.id = id;
+        this.code = code;
+        this.name = name;
+        this.description = description;
+        this.nbrEstimateHours = nbrEstimateHours;
+        this.OUser = OUser;
+        lstActivities = new ArrayList<>();
     }
 
     public int getId() {
@@ -58,20 +82,44 @@ public class Task {
         this.description = description;
     }
 
-    public float getNbrEstimateHours() {
-        return NbrEstimateHours;
+    public float getnbrEstimateHours() {
+        return nbrEstimateHours;
     }
 
-    public void setNbrEstimateHours(float NbrEstimateHours) {
-        this.NbrEstimateHours = NbrEstimateHours;
+    public void setnbrEstimateHours(float nbrEstimateHours) {
+        this.nbrEstimateHours = nbrEstimateHours;
     }
 
-    public User getUser() {
-        return user;
+    public User getOUser() {
+        return OUser;
     }
 
-    public void setUser(User user) {
-        this.user = user;
+    public void setOUser(User OUser) {
+        this.OUser = OUser;
+    }
+
+    public String getStatus() {
+        return status;
+    }
+
+    public void setStatus(String status) {
+        this.status = status;
+    }
+
+    public LocalDate getDt_created() {
+        return dt_created;
+    }
+
+    public void setDt_created(LocalDate dt_created) {
+        this.dt_created = dt_created;
+    }
+
+    public LocalDate getDt_updated() {
+        return dt_updated;
+    }
+
+    public void setDt_updated(LocalDate dt_updated) {
+        this.dt_updated = dt_updated;
     }
 
     public List<Activity> getLstActivities() {

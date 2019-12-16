@@ -61,7 +61,7 @@ public class TaskDaoImpl implements TaskDao {
     public List<Task> findAllByUser(User user) {
         List<Task> lst = new ArrayList<>();
         for (Task oTask : tasks) {
-            if (oTask.getUser().getId() == user.getId()) {
+            if (oTask.getOUser().getId() == user.getId()) {
                 lst.add(oTask);
             }
         }
@@ -70,6 +70,11 @@ public class TaskDaoImpl implements TaskDao {
 
     @Override
     public Boolean addActivityInTask(Task OTask, Activity activity) {
+        List<Activity> lst = OTask.getLstActivities();
+        for(Activity oActivity : lst){
+            if(oActivity.getId()==activity.getId())
+                return false;
+        }
         return OTask.getLstActivities().add(activity);
     }
 

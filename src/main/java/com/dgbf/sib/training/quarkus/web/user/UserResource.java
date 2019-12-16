@@ -7,13 +7,14 @@ import com.dgbf.sib.training.quarkus.exception.user.UserNotCreateException;
 import com.dgbf.sib.training.quarkus.exception.user.UserNotExistException;
 import com.dgbf.sib.training.quarkus.model.Task;
 import com.dgbf.sib.training.quarkus.objectvalue.UserData;
+import com.dgbf.sib.training.quarkus.objectvalue.UserTasks;
 import com.dgbf.sib.training.quarkus.web.exception.UtilisateurOperationFailedException;
 import com.dgbf.sib.training.quarkus.web.exception.UtilisateursNonTrouveException;
 import com.dgbf.sib.training.quarkus.model.User;
+import org.eclipse.microprofile.openapi.annotations.parameters.RequestBody;
 
 import javax.inject.Inject;
 import javax.ws.rs.*;
-import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriBuilder;
@@ -140,18 +141,45 @@ public class UserResource {
 //        }
 //    }
 
-    @POST
+
+
+//    @POST
+//    @Produces(MediaType.APPLICATION_JSON)
+//    @Path("/assignate")
+//    public void assignerDesTachesAUnUtilsateur(User user, List<Task> lstTasks){
+//        try {
+//            if(!userDao.assignateTasksToUser(lstTasks, user)) throw new UtilisateurOperationFailedException("Echec dans l'assignation des tâches a cet utilsateur");
+//        }catch (UserNotExistException e){
+//            System.out.println(e.getMessage());
+//        }
+//    }
+
+    @PUT
     @Produces(MediaType.APPLICATION_JSON)
-    @Path("/assignate")
-    public void assignerDesTachesAUnUtilsateur(List<Task> lstTasks, User user){
+    @Path("/assignate/{id_user}")
+    public void assignerDesTachesAUnUtilsateur(@PathParam("id_user") int id_user, List<Task> lstTasks){
         try {
-            if(!userDao.assignateTasksToUser(lstTasks, user)) throw new UtilisateurOperationFailedException("Echec dans l'assignation des tâches a cet utilsateur");
+            User oUser = userDao.findById(id_user);
+            if(oUser!=null){
+                if(!userDao.assignateTasksToUser(lstTasks, oUser)) throw new UtilisateurOperationFailedException("Echec dans l'assignation des tâches a cet utilsateur");
+            }
         }catch (UserNotExistException e){
             System.out.println(e.getMessage());
         }
     }
 
 
+
+    @POST
+    @Produces(MediaType.APPLICATION_JSON)
+    @Path("/assignate-task")
+    public void assignerDesTachesAUnUtilsateur(UserTasks oUserTasks){
+        try {
+            if(!userDao.assignateTasksToUser(oUserTasks.getLstTasks(), oUserTasks.getOUser())) throw new UtilisateurOperationFailedException("Echec dans l'assignation des tâches a cet utilsateur");
+        }catch (UserNotExistException e){
+            System.out.println(e.getMessage());
+        }
+    }
 
 
 
