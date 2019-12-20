@@ -5,20 +5,17 @@ import io.quarkus.hibernate.orm.panache.PanacheEntity;
 import io.quarkus.hibernate.orm.panache.PanacheEntityBase;
 
 import javax.persistence.*;
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
 
 @Entity
-@Table(name = "t_task")
-public class Task extends PanacheEntityBase {
+public class Task extends PanacheEntity {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "task_sequence")
-    @SequenceGenerator(name = "task_sequence", sequenceName = "t_task_id_seq", allocationSize = 1, initialValue = 5)
-    public Long id;
+    public String id;
     public String code;
     public String name;
     public String description;
@@ -26,10 +23,10 @@ public class Task extends PanacheEntityBase {
     public String status;
     @JoinColumn(name = "id_user", referencedColumnName = "id")
     @ManyToOne
-    public User OUser;
+    public Users OUser;
     public LocalDateTime dt_created;
     public LocalDateTime dt_updated;
-    @OneToMany(cascade={CascadeType.ALL},mappedBy = "OTask")
+    @OneToMany(mappedBy = "OTask")
     public List<Activity> lstActivities = new ArrayList<>();
 
 
@@ -43,6 +40,8 @@ public class Task extends PanacheEntityBase {
 
     @PrePersist
     public void setDtCreated(){
+//        UUID oUuid = UUID.randomUUID();
+//        this.id = Long.toString(oUuid.getMostSignificantBits(),94)+'-'+Long.toString(oUuid.getLeastSignificantBits(),94);
         this.dt_created = LocalDateTime.now();
     }
 

@@ -8,7 +8,7 @@ import ci.gouv.dgbf.sib.taskmanager.exception.task.TaskCodeExistException;
 import ci.gouv.dgbf.sib.taskmanager.exception.task.TaskNotExistException;
 import ci.gouv.dgbf.sib.taskmanager.model.Activity;
 import ci.gouv.dgbf.sib.taskmanager.model.Task;
-import ci.gouv.dgbf.sib.taskmanager.model.User;
+import ci.gouv.dgbf.sib.taskmanager.model.Users;
 import ci.gouv.dgbf.sib.taskmanager.resource.exception.TacheNonTrouveException;
 import ci.gouv.dgbf.sib.taskmanager.resource.exception.TacheOperationFailedException;
 import org.jboss.resteasy.annotations.jaxrs.PathParam;
@@ -43,7 +43,7 @@ public class TaskResource {
 
     @GET
     @Path("/find/{id}")
-    public Task trouverTacheParSonId(@PathParam("id") Long id) {
+    public Task trouverTacheParSonId(@PathParam("id") String id) {
         Task task = OTaskDao.findById(id);
         if (task != null)
             return task;
@@ -60,7 +60,7 @@ public class TaskResource {
 
     @GET
     @Path("/usertask")
-    public List<Task> obtenirLesTachesDeUtilisateur(User user) {
+    public List<Task> obtenirLesTachesDeUtilisateur(Users user) {
         return OTaskDao.find("OUser", user).list();
     }
 

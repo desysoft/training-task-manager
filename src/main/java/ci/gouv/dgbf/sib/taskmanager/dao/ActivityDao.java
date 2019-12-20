@@ -2,6 +2,7 @@ package ci.gouv.dgbf.sib.taskmanager.dao;
 
 import ci.gouv.dgbf.sib.taskmanager.model.Activity;
 import ci.gouv.dgbf.sib.taskmanager.model.Task;
+import io.quarkus.hibernate.orm.panache.PanacheRepository;
 import io.quarkus.hibernate.orm.panache.PanacheRepositoryBase;
 
 import javax.enterprise.context.ApplicationScoped;
@@ -12,7 +13,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 @ApplicationScoped
-public class ActivityDao implements PanacheRepositoryBase<Activity, Long> {
+public class ActivityDao implements PanacheRepository<Activity> {
 
     @Inject
     EntityManager em;
@@ -21,7 +22,11 @@ public class ActivityDao implements PanacheRepositoryBase<Activity, Long> {
         return find("code", code).firstResult();
     }
 
-    public List<Activity> findAllByTask(int id_tache){
+    public Activity findById(String Id){
+        return find("id", Id).firstResult();
+    }
+
+    public List<Activity> findAllByTask(String id_tache){
         return streamAll().filter(activity -> activity.OTask.id==id_tache).collect(Collectors.toList());
     }
 

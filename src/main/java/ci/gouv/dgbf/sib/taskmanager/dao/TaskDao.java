@@ -11,10 +11,15 @@ import javax.transaction.Transactional;
 import java.util.Optional;
 
 @ApplicationScoped
-public class TaskDao implements PanacheRepositoryBase<Task, Long> {
+public class TaskDao implements PanacheRepository<Task> {
+
 
     public Task findByCode(String code){
         return find("code", code).firstResult();
+    }
+
+    public Task findById(String Id){
+        return find("id", Id).firstResult();
     }
 
     public Boolean addActivityInTask(Task OTask, Activity OActivity){

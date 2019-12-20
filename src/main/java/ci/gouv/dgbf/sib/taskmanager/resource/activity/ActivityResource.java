@@ -57,7 +57,7 @@ public class ActivityResource {
 
     @GET
     @Path("taskactivite/{task_id}")
-    public List<Activity> obtenirLesActivitesDeLaTache(@PathParam("task_id") int id_tache) {
+    public List<Activity> obtenirLesActivitesDeLaTache(@PathParam("task_id") String id_tache) {
         return OActivityDao.findAllByTask(id_tache);
     }
 
@@ -107,7 +107,6 @@ public class ActivityResource {
             return Response.serverError().build();
         }
     }
-
 
 
 }

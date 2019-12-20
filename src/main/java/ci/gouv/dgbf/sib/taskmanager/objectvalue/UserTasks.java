@@ -1,7 +1,7 @@
 package ci.gouv.dgbf.sib.taskmanager.objectvalue;
 
 import ci.gouv.dgbf.sib.taskmanager.model.Task;
-import ci.gouv.dgbf.sib.taskmanager.model.User;
+import ci.gouv.dgbf.sib.taskmanager.model.Users;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
@@ -10,7 +10,7 @@ import java.util.List;
 
 public class UserTasks implements Serializable {
 
-    private User OUser;
+    private Users OUser;
 
     private List<Task> lstTasks;
 
@@ -19,16 +19,16 @@ public class UserTasks implements Serializable {
     }
 
     @JsonCreator
-    public UserTasks(@JsonProperty("user") User OUser, @JsonProperty("lsttasks") List<Task> lstTasks) {
+    public UserTasks(@JsonProperty("user") Users OUser, @JsonProperty("lsttasks") List<Task> lstTasks) {
         this.OUser = OUser;
         this.lstTasks = lstTasks;
     }
 
-    public User getOUser() {
+    public Users getOUser() {
         return OUser;
     }
 
-    public void setOUser(User OUser) {
+    public void setOUser(Users OUser) {
         this.OUser = OUser;
     }
 

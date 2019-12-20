@@ -2,6 +2,7 @@ package ci.gouv.dgbf.sib.taskmanager.model;
 
 import io.quarkus.hibernate.orm.panache.PanacheEntity;
 import io.quarkus.hibernate.orm.panache.PanacheEntityBase;
+import org.hibernate.annotations.GenericGenerator;
 
 import javax.persistence.*;
 import java.time.LocalDate;
@@ -9,16 +10,14 @@ import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
 
 @Entity
-@Table(name = "t_user")
-public class User extends PanacheEntityBase {
+public class Users extends PanacheEntity {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.SEQUENCE,generator = "t_user_id_seq")
-    @SequenceGenerator(name = "t_user_id_seq", sequenceName = "t_user_id_seq", allocationSize = 1)
-    public Long id;
+    public String id;
     public String nom;
     public String prenom;
     public String login;
@@ -27,9 +26,9 @@ public class User extends PanacheEntityBase {
     public LocalDateTime dt_lastconnection;
     public LocalDateTime dt_created;
     public LocalDateTime dt_updated;
-    @OneToMany(cascade={CascadeType.ALL},mappedBy = "OUser")
+    @OneToMany(mappedBy = "OUser")
+    @Basic(fetch = FetchType.LAZY)
     public List<Task> lstTasks = new ArrayList<>();
-
 
     @Override
     public String toString(){
@@ -39,8 +38,12 @@ public class User extends PanacheEntityBase {
                 " }";
     }
 
+
+
     @PrePersist
     public void setDt_created(){
+//        UUID oUuid = UUID.randomUUID();
+//        this.id = Long.toString(oUuid.getMostSignificantBits(),94)+'-'+Long.toString(oUuid.getLeastSignificantBits(),94);
         this.dt_created = LocalDateTime.now();
     }
 

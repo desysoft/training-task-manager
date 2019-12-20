@@ -3,18 +3,15 @@ package ci.gouv.dgbf.sib.taskmanager.resource.user;
 
 import ci.gouv.dgbf.sib.taskmanager.dao.TaskDao;
 import ci.gouv.dgbf.sib.taskmanager.exception.user.UserNotCreateException;
+import ci.gouv.dgbf.sib.taskmanager.model.Users;
 import ci.gouv.dgbf.sib.taskmanager.objectvalue.UserData;
 import ci.gouv.dgbf.sib.taskmanager.dao.UserDao;
 import ci.gouv.dgbf.sib.taskmanager.exception.user.UserExistException;
 import ci.gouv.dgbf.sib.taskmanager.exception.user.UserNotExistException;
 import ci.gouv.dgbf.sib.taskmanager.model.Task;
-import ci.gouv.dgbf.sib.taskmanager.objectvalue.UserTasks;
-import ci.gouv.dgbf.sib.taskmanager.resource.exception.UtilisateurOperationFailedException;
 import ci.gouv.dgbf.sib.taskmanager.resource.exception.UtilisateursNonTrouveException;
-import ci.gouv.dgbf.sib.taskmanager.model.User;
 
 import javax.inject.Inject;
-import javax.print.attribute.standard.MediaSize;
 import javax.transaction.Transactional;
 import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
@@ -37,15 +34,15 @@ public class UserResource {
 
     @GET
     @Path("/find")
-    public List<User> obtenirListDesUtilisateurs() {
-        List<User> lst = userDao.findAllUser();
+    public List<Users> obtenirListDesUtilisateurs() {
+        List<Users> lst = userDao.findAllUser();
         if (lst.isEmpty()) throw new UtilisateursNonTrouveException("Aucun utilisateur créé");
         return lst;
     }
 
     @GET
     @Path("/find/{id}")
-    public User trouverUtilisateurParId(@PathParam("id") Long id) {
+    public Users trouverUtilisateurParId(@PathParam("id") String id) {
         try {
             return userDao.findById(id);
         } catch (UserNotExistException e) {
@@ -57,15 +54,15 @@ public class UserResource {
 
     @GET
     @Path("/findByLogin/{login}")
-    public User trouverUtilisateurParLogin(@PathParam("login") String login){
-        User ouser =  userDao.findByLogin(login);
+    public Users trouverUtilisateurParLogin(@PathParam("login") String login){
+        Users ouser =  userDao.findByLogin(login);
         if(ouser != null) return ouser;
         else throw new UtilisateursNonTrouveException("Ce login est inexistant");
     }
 
     @POST
     @Path("/add")
-    public Response ajouterUtilisateur(User user){
+    public Response ajouterUtilisateur(Users user){
         try {
             userDao.persist(user);
             if(userDao.isPersistent(user)){
@@ -85,7 +82,7 @@ public class UserResource {
     @Path("/delete/{id_user}")
     public Response supprimerUtilisateur(@PathParam("id_user") Long id_user){
         try {
-            User oUser = userDao.findById(id_user);
+            Users oUser = userDao.findById(id_user);
             if(oUser!=null){
                 userDao.delete(oUser);
                 return Response.ok().build();
@@ -98,9 +95,9 @@ public class UserResource {
 
     @PUT
     @Path("/update/{id_user}")
-    public Response modifierUnUtilisateur(@PathParam("id_user") Long id, User user){
+    public Response modifierUnUtilisateur(@PathParam("id_user") Long id, Users user){
         try{
-            User oUser = userDao.findById(id);
+            Users oUser = userDao.findById(id);
             if(oUser!=null){
                 oUser.login = user.login;
                 oUser.nom = user.nom;
@@ -121,7 +118,7 @@ public class UserResource {
 
     @POST
     @Path("/login")
-    public User seConnecter(UserData oUserData){
+    public Users seConnecter(UserData oUserData){
         try{
             return userDao.doLogin(oUserData.getLogin(),oUserData.getPwd());
         }catch (UserNotExistException e){
@@ -134,7 +131,7 @@ public class UserResource {
     @Path("/assignate/{id_user}")
     public Response assignerDesTachesAUnUtilsateur(@PathParam("id_user") Long id_user, List<Task> lstTasks){
         try {
-            User oUser = userDao.findById(id_user);
+            Users oUser = userDao.findById(id_user);
             for(Task oTask  : lstTasks){
                 Task oneTask = OTaskDao.findById(oTask.id);
                 if(oneTask.OUser.id!=oUser.id){
