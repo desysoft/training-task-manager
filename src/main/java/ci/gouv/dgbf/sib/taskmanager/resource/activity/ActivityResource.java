@@ -1,11 +1,8 @@
 package ci.gouv.dgbf.sib.taskmanager.resource.activity;
 
 import ci.gouv.dgbf.sib.taskmanager.dao.ActivityDao;
-import ci.gouv.dgbf.sib.taskmanager.exception.activity.ActivityCodeExistException;
 import ci.gouv.dgbf.sib.taskmanager.exception.activity.ActivityNotExistException;
 import ci.gouv.dgbf.sib.taskmanager.model.Activity;
-import ci.gouv.dgbf.sib.taskmanager.model.Task;
-import ci.gouv.dgbf.sib.taskmanager.resource.exception.TacheOperationFailedException;
 
 import javax.inject.Inject;
 import javax.transaction.Transactional;
@@ -82,9 +79,9 @@ public class ActivityResource {
                 oActivity.code = OActivity.code;
                 oActivity.label = OActivity.label;
                 oActivity.description = OActivity.description;
-                oActivity.start_date = OActivity.start_date;
-                oActivity.end_date = OActivity.end_date;
-                oActivity.OTask = OActivity.OTask;
+                oActivity.startDate = OActivity.startDate;
+                oActivity.endDate = OActivity.endDate;
+                oActivity.idTask = OActivity.idTask;
                 OActivityDao.persist(oActivity);
                 URI oUri = UriBuilder.fromPath("activity/find/").path("{id}").build(oActivity.id);
                 return Response.created(oUri).build();

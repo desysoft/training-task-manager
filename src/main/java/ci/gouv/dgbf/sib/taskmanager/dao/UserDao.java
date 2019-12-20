@@ -2,10 +2,8 @@ package ci.gouv.dgbf.sib.taskmanager.dao;
 
 import ci.gouv.dgbf.sib.taskmanager.model.Users;
 import io.quarkus.hibernate.orm.panache.PanacheRepository;
-import io.quarkus.hibernate.orm.panache.PanacheRepositoryBase;
 
 import javax.enterprise.context.ApplicationScoped;
-import javax.transaction.Transactional;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -28,7 +26,7 @@ public class UserDao implements PanacheRepository<Users> {
     public Users doLogin(String login, String pwd){
         Users oUser = Users.find("login  = ?1 AND pwd = ?2 AND status = ?3 ",login, pwd,"enable").firstResult();
         if(oUser!=null){
-            oUser.dt_lastconnection = LocalDateTime.now();
+            oUser.dtLastconnection = LocalDateTime.now();
             this.persist(oUser);
         }
         return oUser;

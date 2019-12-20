@@ -23,13 +23,13 @@ public class TaskDao implements PanacheRepository<Task> {
     }
 
     public Boolean addActivityInTask(Task OTask, Activity OActivity){
-        int count_activity = OTask.lstActivities.size();
-        OActivity.OTask = OTask;
+        int count_activity = OTask.activityList.size();
+        OActivity.idTask = OTask;
         System.out.println("addActivityInTask count before ==== "+count_activity);
-        OTask.lstActivities.add(OActivity);
+        OTask.activityList.add(OActivity);
         this.persist(OTask);
-        System.out.println("addActivityInTask count after ==== "+OTask.lstActivities.size());
-        return OTask.lstActivities.size()>count_activity;
+        System.out.println("addActivityInTask count after ==== "+OTask.activityList.size());
+        return OTask.activityList.size()>count_activity;
     }
 
 }

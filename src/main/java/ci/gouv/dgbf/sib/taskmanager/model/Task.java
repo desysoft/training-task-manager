@@ -5,6 +5,7 @@ import io.quarkus.hibernate.orm.panache.PanacheEntity;
 import io.quarkus.hibernate.orm.panache.PanacheEntityBase;
 
 import javax.persistence.*;
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -15,19 +16,27 @@ import java.util.UUID;
 public class Task extends PanacheEntity {
 
     @Id
+    @Basic(optional = false)
+    @Column(name = "ID", nullable = false, length = 20)
     public String id;
+    @Column(name = "CODE", length = 20)
     public String code;
+    @Column(name = "NAME", length = 500)
     public String name;
-    public String description;
-    public Float nbreestimatehours;
+    // @Max(value=?)  @Min(value=?)//if you know range of your decimal fields consider using these annotations to enforce field validation
+    @Column(name = "NBREESTIMATEHOURS", precision = 4, scale = 2)
+    public BigDecimal nbreestimatehours;
+    @Column(name = "DT_CREATED")
+    public LocalDateTime dtCreated;
+    @Column(name = "DT_UPDATED")
+    public LocalDateTime dtUpdated;
+    @Column(name = "STATUS", length = 20)
     public String status;
-    @JoinColumn(name = "id_user", referencedColumnName = "id")
-    @ManyToOne
-    public Users OUser;
-    public LocalDateTime dt_created;
-    public LocalDateTime dt_updated;
-    @OneToMany(mappedBy = "OTask")
-    public List<Activity> lstActivities = new ArrayList<>();
+    @JoinColumn(name = "ID_USER", referencedColumnName = "ID", nullable = false)
+    @ManyToOne(optional = false)
+    public Users idUser;
+    @OneToMany(mappedBy = "idTask")
+    public List<Activity> activityList;
 
 
     @Override
@@ -40,13 +49,13 @@ public class Task extends PanacheEntity {
 
     @PrePersist
     public void setDtCreated(){
-//        UUID oUuid = UUID.randomUUID();
-//        this.id = Long.toString(oUuid.getMostSignificantBits(),94)+'-'+Long.toString(oUuid.getLeastSignificantBits(),94);
-        this.dt_created = LocalDateTime.now();
+        UUID oUuid = UUID.randomUUID();
+        this.id = Long.toString(oUuid.getMostSignificantBits(),94)+'-'+Long.toString(oUuid.getLeastSignificantBits(),94);
+        this.dtCreated = LocalDateTime.now();
     }
 
     @PreUpdate
     public void setDt_updated(){
-        this.dt_updated = LocalDateTime.now();
+        this.dtUpdated = LocalDateTime.now();
     }
 }

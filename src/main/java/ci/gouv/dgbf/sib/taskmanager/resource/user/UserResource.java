@@ -134,8 +134,8 @@ public class UserResource {
             Users oUser = userDao.findById(id_user);
             for(Task oTask  : lstTasks){
                 Task oneTask = OTaskDao.findById(oTask.id);
-                if(oneTask.OUser.id!=oUser.id){
-                    oneTask.OUser = oUser;
+                if(oneTask.idUser.id!=oUser.id){
+                    oneTask.idUser = oUser;
                     OTaskDao.persist(oneTask);
                 }
             }

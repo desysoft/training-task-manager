@@ -27,16 +27,16 @@ public class ActivityDao implements PanacheRepository<Activity> {
     }
 
     public List<Activity> findAllByTask(String id_tache){
-        return streamAll().filter(activity -> activity.OTask.id==id_tache).collect(Collectors.toList());
+        return streamAll().filter(activity -> activity.idTask.id==id_tache).collect(Collectors.toList());
     }
 
     public Boolean addActivityInTask(Task OTask, Activity OActivity){
-        int count_activity = OTask.lstActivities.size();
-        OActivity.OTask = OTask;
+        int count_activity = OTask.activityList.size();
+        OActivity.idTask = OTask;
         System.out.println("addActivityInTask count before ==== "+count_activity);
         //OTask.lstActivities.add(OActivity);
         this.persist(OActivity);
-        System.out.println("addActivityInTask count after ==== "+OTask.lstActivities.size());
-        return OTask.lstActivities.size()>count_activity;
+        System.out.println("addActivityInTask count after ==== "+OTask.activityList.size());
+        return OTask.activityList.size()>count_activity;
     }
 }
