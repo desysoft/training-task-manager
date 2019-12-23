@@ -64,6 +64,7 @@ public class UserResource {
     @Path("/add")
     public Response ajouterUtilisateur(Users user){
         try {
+            user.status = "enable";
             userDao.persist(user);
             if(userDao.isPersistent(user)){
                 URI oUri = UriBuilder.fromPath("/user/find").path("{id}").build(user.id);

@@ -1,10 +1,7 @@
 package ci.gouv.dgbf.sib.taskmanager.model;
 
-import io.quarkus.hibernate.orm.panache.PanacheEntity;
 
 import javax.persistence.*;
-import java.time.LocalDateTime;
-import java.util.UUID;
 
 @Entity
 @Inheritance(strategy = InheritanceType.TABLE_PER_CLASS)
@@ -22,19 +19,6 @@ public class HistoryVersion extends AbstractEntity {
                 " id = "+this.id+
                 ", name = "+this.description+
                 " }";
-    }
-
-
-    @PrePersist
-    public void initializeEntity(){
-        super.initializeEntity();
-        this.intVersion = 1;
-    }
-
-    @PreUpdate
-    public void setDt_updated(){
-        super.setEntityForUpdate();
-        this.intVersion++;
     }
 
 }

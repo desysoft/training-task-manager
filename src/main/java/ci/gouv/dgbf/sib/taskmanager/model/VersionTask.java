@@ -11,17 +11,6 @@ public class VersionTask extends HistoryVersion {
     public Task OTask;
     public String description;
 
-    @PrePersist
-    public void initializeEntity(){
-        super.initializeEntity();
-//        this.id = super.id;
-    }
-
-    @PreUpdate
-    public void setDt_updated(){
-        super.setEntityForUpdate();
-    }
-
     @Override
     public String toString(){
         return "VersionTast {"+

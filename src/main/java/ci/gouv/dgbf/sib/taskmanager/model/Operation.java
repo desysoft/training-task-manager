@@ -23,15 +23,4 @@ public class Operation extends AbstractEntity {
                 ", name = "+this.name+
                 " }";
     }
-
-    @PrePersist
-    public void initializeEntity(){
-        super.initializeEntity();
-        this.id = super.id;
-    }
-
-    @PreUpdate
-    public void setDt_updated(){
-        super.setEntityForUpdate();
-    }
 }

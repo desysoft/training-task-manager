@@ -21,15 +21,17 @@ public abstract class AbstractEntity extends PanacheEntityBase {
 
     public String generateEntityId(){
         UUID oUuid = UUID.randomUUID();
-        return Long.toString(oUuid.getMostSignificantBits(), 94) + '-' + Long.toString(oUuid.getLeastSignificantBits(), 94);
+        return oUuid.toString().replace("-","").toUpperCase();
     }
 
+    @PrePersist
     public void initializeEntity() {
         this.id = generateEntityId();
         this.dt_created = LocalDateTime.now();
     }
 
 
+    @PreUpdate
     public void setEntityForUpdate() {
         this.dt_updated = LocalDateTime.now();
     }

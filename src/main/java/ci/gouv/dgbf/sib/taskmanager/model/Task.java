@@ -12,20 +12,15 @@ import java.util.UUID;
 
 
 @Entity
-public class Task extends PanacheEntityBase {
+public class Task extends AbstractEntity {
 
-    @Id
-    public String id;
     public String code;
     public String name;
     public String description;
     public Float nbreestimatehours;
-    public String status;
     @JoinColumn(name = "id_user", referencedColumnName = "id")
     @ManyToOne
     public Users OUser;
-    public LocalDateTime dt_created;
-    public LocalDateTime dt_updated;
     @OneToMany(mappedBy = "OTask")
     public List<Activity> lstActivities = new ArrayList<>();
 
@@ -33,20 +28,9 @@ public class Task extends PanacheEntityBase {
     @Override
     public String toString(){
         return "Task {"+
-                " id = "+this.id+
+                " id = "+super.id+
                 ", name = "+this.name+
                 " }";
     }
 
-    @PrePersist
-    public void setDtCreated(){
-        UUID oUuid = UUID.randomUUID();
-        this.id = Long.toString(oUuid.getMostSignificantBits(),94)+'-'+Long.toString(oUuid.getLeastSignificantBits(),94);
-        this.dt_created = LocalDateTime.now();
-    }
-
-    @PreUpdate
-    public void setDt_updated(){
-        this.dt_updated = LocalDateTime.now();
-    }
 }

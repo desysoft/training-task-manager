@@ -14,24 +14,10 @@ public class Project extends AbstractEntity {
     public String description;
     public LocalDateTime dt_startProject;
     public LocalDateTime dt_endProject;
-    public LocalDateTime dt_created;
-    public LocalDateTime dt_updated;
-    public String status;
 
     @ManyToOne
     @JoinColumn(name = "id_projectLead", referencedColumnName = "id")
     public Person OPerson;
-
-    @PrePersist
-    public void initializeEntity(){
-        super.initializeEntity();
-//        this.id = super.id;
-    }
-
-    @PreUpdate
-    public void setDt_updated(){
-        super.setEntityForUpdate();
-    }
 
     @Override
     public String toString(){
