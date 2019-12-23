@@ -20,7 +20,7 @@ public class Activity extends PanacheEntity {
     @Column(name = "DESCRIPTION", length = 500)
     public String description;
     @Column(name = "START_DATE")
-    public LocalDateTime startDate;
+    public LocalDateTime startDate;!
     @Column(name = "END_DATE")
     public LocalDateTime endDate;
     @Column(name = "DT_CREATED")
