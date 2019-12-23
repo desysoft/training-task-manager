@@ -1,13 +1,14 @@
 package ci.gouv.dgbf.sib.taskmanager.model;
 
 import io.quarkus.hibernate.orm.panache.PanacheEntity;
+import io.quarkus.hibernate.orm.panache.PanacheEntityBase;
 
 import javax.persistence.*;
 import java.time.LocalDateTime;
 import java.util.UUID;
 
 @Entity
-public class Activity extends PanacheEntity {
+public class Activity extends PanacheEntityBase {
 
     @Id
     public String id;

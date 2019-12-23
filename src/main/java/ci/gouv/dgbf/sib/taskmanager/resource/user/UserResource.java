@@ -80,7 +80,7 @@ public class UserResource {
 
     @DELETE
     @Path("/delete/{id_user}")
-    public Response supprimerUtilisateur(@PathParam("id_user") Long id_user){
+    public Response supprimerUtilisateur(@PathParam("id_user") String id_user){
         try {
             Users oUser = userDao.findById(id_user);
             if(oUser!=null){
@@ -95,13 +95,13 @@ public class UserResource {
 
     @PUT
     @Path("/update/{id_user}")
-    public Response modifierUnUtilisateur(@PathParam("id_user") Long id, Users user){
+    public Response modifierUnUtilisateur(@PathParam("id_user") String id, Users user){
         try{
             Users oUser = userDao.findById(id);
             if(oUser!=null){
                 oUser.login = user.login;
-                oUser.nom = user.nom;
-                oUser.prenom = user.prenom;
+                oUser.firstName = user.firstName;
+                oUser.lastName = user.lastName;
                 oUser.pwd = user.pwd;
                 userDao.persist(oUser);
                 URI oUri = UriBuilder.fromPath("/user/find").path("{id}").build(user.id);
@@ -129,7 +129,7 @@ public class UserResource {
 
     @PUT
     @Path("/assignate/{id_user}")
-    public Response assignerDesTachesAUnUtilsateur(@PathParam("id_user") Long id_user, List<Task> lstTasks){
+    public Response assignerDesTachesAUnUtilsateur(@PathParam("id_user") String id_user, List<Task> lstTasks){
         try {
             Users oUser = userDao.findById(id_user);
             for(Task oTask  : lstTasks){

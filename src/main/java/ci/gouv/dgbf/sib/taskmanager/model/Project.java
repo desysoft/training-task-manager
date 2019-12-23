@@ -8,9 +8,8 @@ import java.time.LocalDateTime;
 import java.util.UUID;
 
 @Entity
-public class Project extends PanacheEntity {
-    @Id
-    public String id;
+public class Project extends AbstractEntity {
+
     public String name;
     public String description;
     public LocalDateTime dt_startProject;
@@ -24,20 +23,19 @@ public class Project extends PanacheEntity {
     public Person OPerson;
 
     @PrePersist
-    public void setDtCreated(){
-        UUID oUuid = UUID.randomUUID();
-        this.id = Long.toString(oUuid.getMostSignificantBits(),94)+'-'+Long.toString(oUuid.getLeastSignificantBits(),94);
-        this.dt_created = LocalDateTime.now();
+    public void initializeEntity(){
+        super.initializeEntity();
+//        this.id = super.id;
     }
 
     @PreUpdate
     public void setDt_updated(){
-        this.dt_updated = LocalDateTime.now();
+        super.setEntityForUpdate();
     }
 
     @Override
     public String toString(){
-        return "P {"+
+        return "Project {"+
                 " id = "+this.id+
                 ", name = "+this.name+
                 " }";

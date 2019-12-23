@@ -12,7 +12,7 @@ import java.util.UUID;
 
 
 @Entity
-public class Task extends PanacheEntity {
+public class Task extends PanacheEntityBase {
 
     @Id
     public String id;

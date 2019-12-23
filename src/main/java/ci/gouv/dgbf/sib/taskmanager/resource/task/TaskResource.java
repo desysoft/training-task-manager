@@ -76,7 +76,7 @@ public class TaskResource {
 
     @PUT
     @Path("/assignate/{id_tache}/activity/{id_activity}")
-    public Response assignerActiviteAUneTache(@PathParam("id_tache") Long id, @PathParam("id_activity") Long id_activity) {
+    public Response assignerActiviteAUneTache(@PathParam("id_tache") String id, @PathParam("id_activity") String id_activity) {
         Task oTask = OTaskDao.findById(id);
         if (oTask != null) {
             Activity OActivity = OActivityDao.findById(id_activity);
@@ -91,7 +91,7 @@ public class TaskResource {
 
     @DELETE
     @Path("/delete/{id_tache}")
-    public Response supprimerUneTache(@PathParam("id_tache") Long id_tache){
+    public Response supprimerUneTache(@PathParam("id_tache") String id_tache){
         try{
             Task oTask = OTaskDao.findById(id_tache);
             if(oTask!=null){

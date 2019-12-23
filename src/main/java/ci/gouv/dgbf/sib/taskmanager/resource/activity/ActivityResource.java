@@ -33,7 +33,7 @@ public class ActivityResource {
 
     @GET
     @Path("find/{id}")
-    public Activity trouverActiviteParSonId(@PathParam("id") Long id) {
+    public Activity trouverActiviteParSonId(@PathParam("id") String id) {
         try {
             Activity oActivity = OActivityDao.findById(id);
             return oActivity;
@@ -75,7 +75,7 @@ public class ActivityResource {
 
     @PUT
     @Path("update/{id_activity}")
-    public Response modifierUneActivite(@PathParam("id_activity") Long id, Activity OActivity) {
+    public Response modifierUneActivite(@PathParam("id_activity") String id, Activity OActivity) {
         try {
             Activity oActivity = OActivityDao.findById(id);
             if (oActivity != null) {
@@ -96,7 +96,7 @@ public class ActivityResource {
 
     @DELETE
     @Path("delete/{id}")
-    public Response supprimerUneActivite(@PathParam("id") Long id) {
+    public Response supprimerUneActivite(@PathParam("id") String id) {
         try {
             Activity oActivity = OActivityDao.findById(id);
             if (oActivity != null) {

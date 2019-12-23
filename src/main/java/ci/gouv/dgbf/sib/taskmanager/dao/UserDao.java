@@ -10,7 +10,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 @ApplicationScoped
-public class UserDao implements PanacheRepository<Users> {
+public class UserDao implements PanacheRepositoryBase<Users, String> {
 
 
     public List<Users> findAllUser(){
