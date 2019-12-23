@@ -42,8 +42,8 @@ public class Users extends PanacheEntity {
 
     @PrePersist
     public void setDt_created(){
-//        UUID oUuid = UUID.randomUUID();
-//        this.id = Long.toString(oUuid.getMostSignificantBits(),94)+'-'+Long.toString(oUuid.getLeastSignificantBits(),94);
+        UUID oUuid = UUID.randomUUID();
+        this.id = Long.toString(oUuid.getMostSignificantBits(),94)+'-'+Long.toString(oUuid.getLeastSignificantBits(),94);
         this.dt_created = LocalDateTime.now();
     }
 

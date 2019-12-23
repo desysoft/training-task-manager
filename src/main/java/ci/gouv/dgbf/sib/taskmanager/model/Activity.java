@@ -4,6 +4,7 @@ import io.quarkus.hibernate.orm.panache.PanacheEntity;
 
 import javax.persistence.*;
 import java.time.LocalDateTime;
+import java.util.UUID;
 
 @Entity
 public class Activity extends PanacheEntity {
@@ -32,8 +33,8 @@ public class Activity extends PanacheEntity {
 
     @PrePersist
     public void setDt_created(){
-//        UUID oUuid = UUID.randomUUID();
-//        this.id = Long.toString(oUuid.getMostSignificantBits(),94)+'-'+Long.toString(oUuid.getLeastSignificantBits(),94);
+        UUID oUuid = UUID.randomUUID();
+        this.id = Long.toString(oUuid.getMostSignificantBits(),94)+'-'+Long.toString(oUuid.getLeastSignificantBits(),94);
         this.dt_created = LocalDateTime.now();
     }
 
