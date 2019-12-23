@@ -30,7 +30,6 @@ public abstract class AbstractEntity extends PanacheEntityBase {
         this.dt_created = LocalDateTime.now();
     }
 
-
     @PreUpdate
     public void setEntityForUpdate() {
         this.dt_updated = LocalDateTime.now();

@@ -3,7 +3,8 @@ package ci.gouv.dgbf.sib.taskmanager.model;
 import javax.persistence.*;
 
 @Entity
-public class VersionActivity extends HistoryVersion {
+@DiscriminatorValue("activity")
+public class VersionActivity extends Version {
 
 
     @ManyToOne

@@ -11,6 +11,7 @@ import ci.gouv.dgbf.sib.taskmanager.model.Task;
 
 
 @Entity
+@DiscriminatorValue("user")
 public class Users extends Person {
 
     @Column(unique = true)

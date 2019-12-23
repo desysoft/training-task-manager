@@ -3,8 +3,8 @@ package ci.gouv.dgbf.sib.taskmanager.model;
 import javax.persistence.*;
 
 @Entity
-public class VersionTask extends HistoryVersion {
-
+@DiscriminatorValue("task")
+public class VersionTask extends Version {
 
     @ManyToOne
     @JoinColumn(name = "id_task", referencedColumnName = "id")

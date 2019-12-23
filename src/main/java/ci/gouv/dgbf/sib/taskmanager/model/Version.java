@@ -4,8 +4,9 @@ package ci.gouv.dgbf.sib.taskmanager.model;
 import javax.persistence.*;
 
 @Entity
-@Inheritance(strategy = InheritanceType.TABLE_PER_CLASS)
-public class HistoryVersion extends AbstractEntity {
+@Inheritance(strategy = InheritanceType.SINGLE_TABLE)
+@DiscriminatorColumn(name = "version_type")
+public class Version extends AbstractEntity {
 
     public String description;
     public int intVersion;
