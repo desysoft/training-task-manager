@@ -18,6 +18,7 @@ public class Task extends AbstractEntity {
     public String name;
     public String description;
     public Float nbreestimatehours;
+    public int intVersion;
     @JoinColumn(name = "id_user", referencedColumnName = "id")
     @ManyToOne
     public Users OUser;
@@ -26,11 +27,17 @@ public class Task extends AbstractEntity {
 
 
     @Override
-    public String toString(){
-        return "Task {"+
-                " id = "+super.id+
-                ", name = "+this.name+
+    public String toString() {
+        return "Task {" +
+                " id = " + super.id +
+                ", name = " + this.name +
                 " }";
+    }
+
+    @PreUpdate
+    public void setEntityForUpdate() {
+        super.setEntityForUpdate();
+        this.intVersion++;
     }
 
 }
