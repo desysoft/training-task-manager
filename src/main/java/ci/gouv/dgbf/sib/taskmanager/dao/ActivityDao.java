@@ -2,6 +2,7 @@ package ci.gouv.dgbf.sib.taskmanager.dao;
 
 import ci.gouv.dgbf.sib.taskmanager.model.Activity;
 import ci.gouv.dgbf.sib.taskmanager.model.Task;
+import ci.gouv.dgbf.sib.taskmanager.tools.ParametersConfig;
 import io.quarkus.hibernate.orm.panache.PanacheRepository;
 import io.quarkus.hibernate.orm.panache.PanacheRepositoryBase;
 
@@ -38,5 +39,26 @@ public class ActivityDao implements PanacheRepositoryBase<Activity, String> {
         this.persist(OActivity);
         System.out.println("addActivityInTask count after ==== "+OTask.lstActivities.size());
         return OTask.lstActivities.size()>count_activity;
+    }
+
+    public boolean deleteActivity(Activity activity){
+        try {
+            activity.status = ParametersConfig.status_delete;
+            return this.isPersistent(activity);
+        }catch (Exception e){
+            e.printStackTrace();
+            return false;
+        }
+    }
+
+    public boolean deleteActivity(String id){
+        try {
+            Activity oActivity = this.findById(id);
+            oActivity.status = ParametersConfig.status_delete;
+            return this.isPersistent(oActivity);
+        }catch (Exception e){
+            e.printStackTrace();
+            return false;
+        }
     }
 }

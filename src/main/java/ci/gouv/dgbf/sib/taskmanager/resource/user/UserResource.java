@@ -64,7 +64,7 @@ public class UserResource {
 
     @GET
     @Path("/search/{value}")
-    public List<Users> RechercherParMotCle(@DefaultValue("") @PathParam("value") String value) {
+    public List<Users> RechercherParMotCle(@PathParam("value") String value) {
         List<Users> lst = userDao.findAllUser(value);
         if (lst.size() == 0) throw new WebApplicationException("Aucun utilisateur trouvé", Response.Status.NO_CONTENT);
         else return lst;

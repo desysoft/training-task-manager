@@ -22,6 +22,9 @@ public class Task extends AbstractEntity {
     @JoinColumn(name = "id_user", referencedColumnName = "id")
     @ManyToOne
     public Users OUser;
+    @ManyToOne
+    @JoinColumn(name = "id_project", referencedColumnName = "id")
+    public Project OProject;
     @OneToMany(mappedBy = "OTask")
     public List<Activity> lstActivities = new ArrayList<>();
 

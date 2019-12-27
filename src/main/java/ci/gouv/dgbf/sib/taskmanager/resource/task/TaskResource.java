@@ -43,6 +43,14 @@ public class TaskResource {
     }
 
     @GET
+    @Path("search/{value}")
+    public List<Task> rechercherTacheParMotCle(@PathParam("{value}") String value){
+        List<Task> lstTasks = OTaskDao.findAllTask(value);
+        if (lstTasks.isEmpty()) throw new WebApplicationException("Aucune tâche correspondant au critère de recherche", Response.noContent().build());
+        return lstTasks;
+    }
+
+    @GET
     @Path("/find/{id}")
     public Task trouverTacheParSonId(@PathParam("id") String id) {
         Task task = OTaskDao.findById(id);
@@ -105,16 +113,22 @@ public class TaskResource {
     }
 
 
+
+
+
+
+
     @DELETE
     @Path("/delete/{id_tache}")
     public Response supprimerUneTache(@PathParam("id_tache") String id_tache) {
         try {
-            Task oTask = OTaskDao.findById(id_tache);
-            if (oTask != null) {
-                OTaskDao.delete(oTask);
+            if(OTaskDao.deleteTask(id_tache)){
                 return Response.ok().build();
-            } else throw new WebApplicationException("Tâche introuvable", Response.Status.NOT_FOUND);
+            }else {
+                return Response.notModified().build();
+            }
         } catch (Exception e) {
+            System.out.println(e.getMessage());
             return Response.notModified().status(Response.Status.INTERNAL_SERVER_ERROR).build();
         }
     }

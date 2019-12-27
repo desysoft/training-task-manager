@@ -3,6 +3,7 @@ package ci.gouv.dgbf.sib.taskmanager.dao;
 import ci.gouv.dgbf.sib.taskmanager.exception.task.TaskNotExistException;
 import ci.gouv.dgbf.sib.taskmanager.model.Activity;
 import ci.gouv.dgbf.sib.taskmanager.model.Operation;
+import ci.gouv.dgbf.sib.taskmanager.model.Project;
 import ci.gouv.dgbf.sib.taskmanager.model.Task;
 import ci.gouv.dgbf.sib.taskmanager.tools.ParametersConfig;
 import ci.gouv.dgbf.sib.taskmanager.exception.operation.OperationNotExistException;
@@ -12,6 +13,8 @@ import io.quarkus.panache.common.Parameters;
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 import javax.transaction.Transactional;
+import java.time.format.TextStyle;
+import java.util.List;
 
 @ApplicationScoped
 @Transactional
@@ -23,12 +26,23 @@ public class TaskDao implements PanacheRepositoryBase<Task, String> {
     @Inject
     VersionTaskDao OVersionTaskDao;
 
-    public Task findByCode(String code){
-        return find("code LIKE :code AND status LIKE :status", Parameters.with("code",code).and("status", ParametersConfig.status_enable)).firstResult();
+    @Inject
+    ActivityDao OActivityDao;
+
+    public List<Task> findAllTask() {
+        return find("status = ?1", ParametersConfig.status_enable).list();
     }
 
-    public Task findById(String id){
-        return find("id = ?1 AND status = ?2", id, ParametersConfig.status_enable ).firstResult();
+    public List<Task> findAllTask(String search_value) {
+        return find("(name LIKE :search_value OR description LIKE :search_value OR code LIKE :search_value) AND status = :status", Parameters.with("search_value","%"+ search_value+"%").and("status", ParametersConfig.status_enable)).list();
+    }
+
+    public Task findByCode(String code) {
+        return find("code LIKE :code AND status LIKE :status", Parameters.with("code", code).and("status", ParametersConfig.status_enable)).firstResult();
+    }
+
+    public Task findById(String id) {
+        return find("id = ?1 AND status = ?2", id, ParametersConfig.status_enable).firstResult();
     }
 
     public Task updateTask(String id_task, String id_operation, Task OTask) throws TaskNotExistException, OperationNotExistException {
@@ -54,14 +68,48 @@ public class TaskDao implements PanacheRepositoryBase<Task, String> {
         } else throw new TaskNotExistException("Tâche introuvable");
     }
 
-    public Boolean addActivityInTask(Task OTask, Activity OActivity){
+    public Boolean addActivityInTask(Task OTask, Activity OActivity) {
         int count_activity = OTask.lstActivities.size();
         OActivity.OTask = OTask;
-        System.out.println("addActivityInTask count before ==== "+count_activity);
+        System.out.println("addActivityInTask count before ==== " + count_activity);
         OTask.lstActivities.add(OActivity);
         this.persist(OTask);
-        System.out.println("addActivityInTask count after ==== "+OTask.lstActivities.size());
-        return OTask.lstActivities.size()>count_activity;
+        System.out.println("addActivityInTask count after ==== " + OTask.lstActivities.size());
+        return OTask.lstActivities.size() > count_activity;
     }
 
+
+    public boolean deleteTask(String id) throws TaskNotExistException {
+        Task oTask = findById(id);
+        List<Activity> lstActivities = oTask.lstActivities;
+        if (oTask != null) {
+            oTask.status = ParametersConfig.status_delete;
+            for (Activity a : lstActivities) {
+                if (!OActivityDao.deleteActivity(a))
+                    return false;
+                break;
+            }
+            return isPersistent(oTask);
+        } else return false;
+    }
+
+    public boolean deleteTask(Task task) {
+        List<Activity> lstActivities = task.lstActivities;
+        task.status = ParametersConfig.status_delete;
+        for (Activity a : lstActivities) {
+            if (!OActivityDao.deleteActivity(a))
+                return false;
+            break;
+        }
+        return isPersistent(task);
+    }
+
+
+
+    public void addTasksInProjet(List<Task> lstTasks, Project project){
+        for(Task t : lstTasks){
+            t.OProject  = project;
+        }
+        this.persist(lstTasks);
+    }
 }
