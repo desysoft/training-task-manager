@@ -37,7 +37,7 @@ public class TaskResource {
     @GET
     @Path("/find")
     public List<Task> listeDesTaches() {
-        List<Task> lesTaches = OTaskDao.listAll();
+        List<Task> lesTaches = OTaskDao.findAllTask();
         if (lesTaches.isEmpty()) throw new TacheNonTrouveException("Aucune tache n'est encore créée");
         return lesTaches;
     }
@@ -53,7 +53,7 @@ public class TaskResource {
     @GET
     @Path("/find/{id}")
     public Task trouverTacheParSonId(@PathParam("id") String id) {
-        Task task = OTaskDao.findById(id);
+        Task task = OTaskDao.findByIdCustom(id).orElse(null);
         if (task != null)
             return task;
         else throw new WebApplicationException("Tache introuvable", Response.Status.NOT_FOUND);
@@ -62,7 +62,7 @@ public class TaskResource {
     @GET
     @Path("/findByCode/{code}")
     public Task trouverTacheParSonCode(@PathParam("code") String code) {
-        Task oTask = OTaskDao.findByCode(code);
+        Task oTask = OTaskDao.findByCode(code).orElse(null);
         if (oTask == null) throw new TaskCodeExistException("Code " + code + " introuvable dans la liste des tâches");
         else return oTask;
     }
@@ -101,9 +101,9 @@ public class TaskResource {
     @PUT
     @Path("/assignate/{id_tache}/activity/{id_activity}")
     public Response assignerActiviteAUneTache(@PathParam("id_tache") String id, @PathParam("id_activity") String id_activity) {
-        Task oTask = OTaskDao.findById(id);
+        Task oTask = OTaskDao.findByIdCustom(id).orElse(null);
         if (oTask != null) {
-            Activity OActivity = OActivityDao.findById(id_activity);
+            Activity OActivity = OActivityDao.findByIdCustom(id_activity);
             if (OActivity != null) {
                 if (!OActivityDao.addActivityInTask(oTask, OActivity))
                     throw new WebApplicationException("Assignation d'activité à la tache échoué", Response.Status.EXPECTATION_FAILED);

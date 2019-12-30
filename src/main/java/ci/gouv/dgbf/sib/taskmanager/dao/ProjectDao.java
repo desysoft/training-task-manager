@@ -1,20 +1,22 @@
 package ci.gouv.dgbf.sib.taskmanager.dao;
 
+import ci.gouv.dgbf.sib.taskmanager.exception.operation.OperationNotExistException;
 import ci.gouv.dgbf.sib.taskmanager.exception.project.ProjectNotExistException;
 import ci.gouv.dgbf.sib.taskmanager.exception.task.TaskNotExistException;
-import ci.gouv.dgbf.sib.taskmanager.model.Activity;
-import ci.gouv.dgbf.sib.taskmanager.model.Operation;
-import ci.gouv.dgbf.sib.taskmanager.model.Project;
-import ci.gouv.dgbf.sib.taskmanager.model.Task;
+import ci.gouv.dgbf.sib.taskmanager.model.*;
 import ci.gouv.dgbf.sib.taskmanager.tools.ParametersConfig;
 import io.quarkus.hibernate.orm.panache.PanacheRepositoryBase;
 import io.quarkus.panache.common.Parameters;
+import org.graalvm.collections.EconomicMap;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
+import javax.persistence.EntityManager;
 import javax.transaction.Transactional;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 @ApplicationScoped
 @Transactional
@@ -29,17 +31,35 @@ public class ProjectDao implements PanacheRepositoryBase<Project, String> {
     @Inject
     TaskDao OTaskDao;
 
+    @Inject
+    EntityManager em;
 
-    public Project findById(String id) {
-        return find("id = ?1 AND status = ?2 ", id, ParametersConfig.status_enable).firstResult();
+    public Optional<Project> findByIdCustom(String id) {
+        return getProjectWithRateComplteProject(find("id = ?1 AND status = ?2 ", id, ParametersConfig.status_enable).list());
     }
 
     public List<Project> findAllProject() {
         return find("status = ?1", ParametersConfig.status_enable).list();
     }
 
+
     public List<Project> findAllProject(String search_value) {
-        return find("(name LIKE :search_value OR description LIKE :search_value) AND status = :status", Parameters.with("search_value", "%"+search_value+"%").and("status", ParametersConfig.status_enable)).list();
+        return find("(name LIKE :search_value OR description LIKE :search_value) AND status = :status", Parameters.with("search_value", "%"+search_value+"%").and("status", ParametersConfig.status_enable)).stream().peek(project -> project.setProjectCompletionRate()).collect(Collectors.toList());
+    }
+
+    public List<Task> findAllTasksProject(String id_project){
+        List<Task> lst = em.createQuery("SELECT t FROM Task t WHERE t.OProject.id = ?1 AND t.status = ?2")
+                .setParameter(1, id_project)
+                .setParameter(2, ParametersConfig.status_enable)
+                .getResultList();
+        for (Task t: lst) {
+            em.refresh(t);
+        }
+        return lst;
+    }
+
+    public List<Project> findAllPersonProjects(String id_person){
+        return find("OPerson.id = ?1 AND status = ?2", id_person, ParametersConfig.status_enable).list();
     }
 
     public boolean addProject(Project project) {
@@ -118,6 +138,27 @@ public class ProjectDao implements PanacheRepositoryBase<Project, String> {
                 OTaskDao.persist(t);
             }
         }
+    }
+
+    public Boolean designateLeadProject(String id_project, Person person) throws ProjectNotExistException, OperationNotExistException{
+        try{
+
+            Project oProject = this.findByIdCustom(id_project).orElse(null);
+            if(oProject==null) throw new ProjectNotExistException("Projet introuvable");
+            Operation oOperation =OOperationDao.findByIdCustom("1");
+            if(oOperation==null) throw new OperationNotExistException("Action sur projet impossible car non définit dans la base de données");
+            OVersionProjectDao.addVersionProject(oProject, oOperation);
+            oProject.OPerson = person;
+            this.persist(oProject);
+            return true;
+        }catch (Exception e){
+            e.printStackTrace();
+            return false;
+        }
+    }
+
+    public Optional<Project> getProjectWithRateComplteProject(List<Project> lstProjects){
+        return lstProjects.stream().peek(project -> project.setProjectCompletionRate()).findFirst();
     }
 
     public TaskDao getOTaskDao() {

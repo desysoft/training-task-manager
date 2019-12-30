@@ -20,7 +20,7 @@ public class VersionTaskDao implements PanacheRepositoryBase<VersionTask, String
         return find("status = ?1", ParametersConfig.status_enable).list();
     }
 
-    public VersionTask findById(String id){
+    public VersionTask findByIdCustom(String id){
         return find("id = ?1 AND status = ?2", id, ParametersConfig.status_enable).firstResult();
     }
 
@@ -34,6 +34,7 @@ public class VersionTaskDao implements PanacheRepositoryBase<VersionTask, String
         oVersionTask.OOperation = oOperation;
         oVersionTask.intVersion = oTask.intVersion;
         oVersionTask.description = oOperation.name+" - "+ oTask.name;
+        oVersionTask.id_Person = (oTask.OUser==null)?null:oTask.OUser.id;
         persist(oVersionTask);
     }
 }

@@ -1,6 +1,7 @@
 package ci.gouv.dgbf.sib.taskmanager.resource.project;
 
 import ci.gouv.dgbf.sib.taskmanager.dao.ProjectDao;
+import ci.gouv.dgbf.sib.taskmanager.model.Person;
 import ci.gouv.dgbf.sib.taskmanager.model.Project;
 import ci.gouv.dgbf.sib.taskmanager.model.Task;
 
@@ -30,7 +31,7 @@ public class ProjectResource {
     @GET
     @Path("find/{id}")
     public Project trouverProjetParSonId(@PathParam("id") String id) {
-        Project oProject = OProjectDao.findById(id);
+        Project oProject = OProjectDao.findByIdCustom(id).orElse(null);
         if (oProject == null) throw new WebApplicationException("Projet introuvable", Response.noContent().build());
         return oProject;
     }
@@ -47,9 +48,13 @@ public class ProjectResource {
     @GET
     @Path("projetTasks/{id}")
     public List<Task> obtenirLesTachesDuProjet(@PathParam("id") String id_project) {
-        Project oProject = OProjectDao.findById(id_project);
-        if (oProject == null) throw new WebApplicationException("Projet introuvable", Response.Status.NOT_FOUND);
-        return oProject.lstTasks;
+        return OProjectDao.findAllTasksProject(id_project);
+    }
+
+    @GET
+    @Path("personProject/{id_person}")
+    public List<Project> obtenirLesProjetsDeLaPersonne(@PathParam("id_person") String id_person){
+        return OProjectDao.findAllPersonProjects(id_person);
     }
 
     @POST
@@ -98,6 +103,19 @@ public class ProjectResource {
         try {
             OProjectDao.addTasksInProjet(lstTasks,id_project);
             return Response.ok().build();
+        }catch (Exception e){
+            e.printStackTrace();
+            return Response.serverError().build();
+        }
+    }
+    @PUT
+    @Path("designate/{id_project}")
+    public Response designerResponsableProjet(@PathParam("id_project") String id_project, Person person){
+        try {
+            if(OProjectDao.designateLeadProject(id_project, person)){
+                URI oUri = UriBuilder.fromPath("project/find").path("{id}").build(id_project);
+                return Response.ok().contentLocation(oUri).build();
+            }else return Response.notModified().build();
         }catch (Exception e){
             e.printStackTrace();
             return Response.serverError().build();

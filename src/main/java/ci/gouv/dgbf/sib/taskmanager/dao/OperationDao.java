@@ -9,7 +9,7 @@ import javax.enterprise.context.ApplicationScoped;
 @ApplicationScoped
 public class OperationDao implements PanacheRepositoryBase<Operation, String> {
 
-    public Operation findById(String id){
+    public Operation findByIdCustom(String id){
         return find("id = ?1 AND status = ?2",id, ParametersConfig.status_enable).firstResult();
     }
 }

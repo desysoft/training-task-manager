@@ -19,11 +19,14 @@ public class Activity extends AbstractEntity {
     @JoinColumn(name = "id_task", referencedColumnName = "id")
     public Task OTask;
 
+    public float activityCompletionRate;
+
     @Override
     public String toString(){
         return "Activity{"+
                 ", id="+this.id+
                 ", label="+this.label+
+                ", status="+this.status+
                 " }";
     }
 }

@@ -13,6 +13,7 @@ public class Version extends AbstractEntity {
     @ManyToOne
     @JoinColumn(name = "id_operation", referencedColumnName = "id")
     public Operation OOperation;
+    public String id_Person;
 
     @Override
     public String toString(){

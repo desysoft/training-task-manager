@@ -27,7 +27,7 @@ public class ActivityResource {
     @GET
     @Path("find")
     public List<Activity> listeDesActivites() {
-        List<Activity> lesActivites = OActivityDao.listAll();
+        List<Activity> lesActivites = OActivityDao.findAllActivity();
         return lesActivites;
     }
 
@@ -35,7 +35,7 @@ public class ActivityResource {
     @Path("find/{id}")
     public Activity trouverActiviteParSonId(@PathParam("id") String id) {
         try {
-            Activity oActivity = OActivityDao.findById(id);
+            Activity oActivity = OActivityDao.findByIdCustom(id);
             return oActivity;
         } catch (ActivityNotExistException e) {
             System.out.println(e.getMessage());
@@ -77,7 +77,7 @@ public class ActivityResource {
     @Path("update/{id_activity}")
     public Response modifierUneActivite(@PathParam("id_activity") String id, Activity OActivity) {
         try {
-            Activity oActivity = OActivityDao.findById(id);
+            Activity oActivity = OActivityDao.findByIdCustom(id);
             if (oActivity != null) {
                 oActivity.code = OActivity.code;
                 oActivity.label = OActivity.label;
@@ -98,7 +98,7 @@ public class ActivityResource {
     @Path("delete/{id}")
     public Response supprimerUneActivite(@PathParam("id") String id) {
         try {
-            Activity oActivity = OActivityDao.findById(id);
+            Activity oActivity = OActivityDao.findByIdCustom(id);
             if (oActivity != null) {
                 OActivityDao.delete(oActivity);
                 return Response.ok().build();

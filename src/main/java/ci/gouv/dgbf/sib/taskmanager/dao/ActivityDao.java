@@ -19,26 +19,39 @@ public class ActivityDao implements PanacheRepositoryBase<Activity, String> {
     @Inject
     EntityManager em;
 
-    public Activity findByCode(String code){
-        return find("code", code).firstResult();
+    public List<Activity> findAllActivity(){
+        return find("status <> ?1", ParametersConfig.status_delete).list();
     }
 
-    public Activity findById(String Id){
-        return find("id", Id).firstResult();
+    public Activity findByCode(String code){
+        return find("code =?1 AND status <> ?2", code, ParametersConfig.status_delete).firstResult();
+    }
+
+    public Activity findByIdCustom(String Id){
+        return find("id = ?1 and status <> ?2 ", Id, ParametersConfig.status_delete).firstResult();
     }
 
     public List<Activity> findAllByTask(String id_tache){
-        return streamAll().filter(activity -> activity.OTask.id==id_tache).collect(Collectors.toList());
+        return em.createQuery("SELECT t FROM Activity t WHERE t.OTask.id = ?1 AND t.status <> ?2")
+                .setParameter(1, id_tache)
+                .setParameter(2, ParametersConfig.status_delete)
+                .getResultList();
     }
 
+    public List<Activity> findAllByStatus(String status){
+        return Activity.list("status", status);
+    }
+
+
     public Boolean addActivityInTask(Task OTask, Activity OActivity){
-        int count_activity = OTask.lstActivities.size();
-        OActivity.OTask = OTask;
-        System.out.println("addActivityInTask count before ==== "+count_activity);
-        //OTask.lstActivities.add(OActivity);
-        this.persist(OActivity);
-        System.out.println("addActivityInTask count after ==== "+OTask.lstActivities.size());
-        return OTask.lstActivities.size()>count_activity;
+        try {
+            OActivity.OTask = OTask;
+            this.persist(OActivity);
+            return true;
+        }catch (Exception e){
+            e.printStackTrace();
+            return false;
+        }
     }
 
     public boolean deleteActivity(Activity activity){
@@ -56,6 +69,20 @@ public class ActivityDao implements PanacheRepositoryBase<Activity, String> {
             Activity oActivity = this.findById(id);
             oActivity.status = ParametersConfig.status_delete;
             return this.isPersistent(oActivity);
+        }catch (Exception e){
+            e.printStackTrace();
+            return false;
+        }
+    }
+
+    public Boolean updateActivityCompletionRate(Activity activity, float completionReate){
+        try {
+            Activity oActivity = this.findByIdCustom(activity.id);
+            if(oActivity==null) return false;
+            oActivity.activityCompletionRate = completionReate;
+            if(completionReate>=100) oActivity.status = ParametersConfig.status_complete;
+            persist(oActivity);
+            return true;
         }catch (Exception e){
             e.printStackTrace();
             return false;

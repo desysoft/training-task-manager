@@ -16,20 +16,22 @@ public class VersionProjectDao implements PanacheRepositoryBase<VersionProject, 
         return find("status = ?1", ParametersConfig.status_enable).list();
     }
 
-    public VersionProject findById(String id){
+    public VersionProject findByIdCustom(String id){
         return find("id = ?1 AND status = ?2", id, ParametersConfig.status_enable).firstResult();
     }
 
-    public List<VersionProject> findAllByProject(String id_task){
-        return find("OProject.id = ?1 AND status = ?2", id_task, ParametersConfig.status_enable).list();
+    public List<VersionProject> findAllByProject(String id_project){
+        return find("OProject.id = ?1 AND status = ?2", id_project, ParametersConfig.status_enable).list();
     }
 
     public void addVersionProject(Project oProject, Operation oOperation){
         VersionProject oVersionProject = new VersionProject();
+        System.out.println("addVersionProject +++ leadProject === "+oProject.OPerson);
         oVersionProject.OProject = oProject;
         oVersionProject.OOperation = oOperation;
         oVersionProject.intVersion = oProject.intVersion;
         oVersionProject.description = oOperation.name+" - "+ oProject.name;
+        oVersionProject.id_Person = (oProject.OPerson==null)?null:oProject.OPerson.id;
         persist(oVersionProject);
     }
 }

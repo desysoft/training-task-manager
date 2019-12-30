@@ -5,6 +5,7 @@ import org.checkerframework.checker.units.qual.A;
 
 import javax.persistence.*;
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.UUID;
 
 @Entity
@@ -15,6 +16,9 @@ public class Person extends AbstractEntity {
     public String firstName;
     public String lastName;
     public String contact;
+
+    @OneToMany(mappedBy = "OPerson", fetch = FetchType.LAZY)
+    public List<Project> lstProjects;
 
     @Override
     public String toString(){

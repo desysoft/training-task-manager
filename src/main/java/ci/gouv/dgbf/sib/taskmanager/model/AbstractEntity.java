@@ -19,6 +19,8 @@ public abstract class AbstractEntity extends PanacheEntityBase {
     public String updatedBy;
     public String status;
 
+
+
     public String generateEntityId(){
         UUID oUuid = UUID.randomUUID();
         return oUuid.toString().replace("-","").toUpperCase();

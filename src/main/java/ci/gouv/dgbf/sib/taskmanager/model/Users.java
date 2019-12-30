@@ -20,10 +20,8 @@ public class Users extends Person {
     public String status;
     public LocalDateTime dt_lastconnection;
 
-    @OneToMany(mappedBy = "OUser")
-    @Basic(fetch = FetchType.LAZY)
-    public List<Task> lstTasks;
-    //public List<Task> lstTasks = new ArrayList<>();
+    @OneToMany(mappedBy = "OUser", fetch = FetchType.LAZY)
+    public List<Task> lstTasks  = new ArrayList<>();
 
     @Override
     public String toString(){
