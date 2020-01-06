@@ -12,7 +12,7 @@ import ci.gouv.dgbf.sib.taskmanager.model.Task;
 
 @Entity
 @DiscriminatorValue("user")
-public class Users extends Person {
+public class User extends Person {
 
     @Column(unique = true)
     public String login;
@@ -20,8 +20,8 @@ public class Users extends Person {
     public String status;
     public LocalDateTime dt_lastconnection;
 
-    @OneToMany(mappedBy = "OUser", fetch = FetchType.LAZY)
-    public List<Task> lstTasks  = new ArrayList<>();
+//    @OneToMany(mappedBy = "OUser", fetch = FetchType.LAZY)
+//    public List<Task> lstTasks  = new ArrayList<>();
 
     @Override
     public String toString(){

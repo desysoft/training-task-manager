@@ -5,6 +5,8 @@ import io.quarkus.hibernate.orm.panache.PanacheEntityBase;
 
 import javax.persistence.*;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
 
 @Entity
@@ -18,6 +20,9 @@ public class Activity extends AbstractEntity {
     @ManyToOne
     @JoinColumn(name = "id_task", referencedColumnName = "id")
     public Task OTask;
+
+    @OneToMany(mappedBy = "OActivity")
+    public List<VersionActivity> lstVersionActivities = new ArrayList<>();
 
     public float activityCompletionRate;
 

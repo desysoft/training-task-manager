@@ -10,7 +10,7 @@ import javax.enterprise.context.ApplicationScoped;
 import java.util.List;
 
 @ApplicationScoped
-public class VersionProjectDao implements PanacheRepositoryBase<VersionProject, String> {
+public class VersionProjectDao  extends AbstractDao implements PanacheRepositoryBase<VersionProject, String> {
 
     public List<VersionProject> findAllVersionProjects(){
         return find("status = ?1", ParametersConfig.status_enable).list();
@@ -30,6 +30,9 @@ public class VersionProjectDao implements PanacheRepositoryBase<VersionProject, 
         oVersionProject.OProject = oProject;
         oVersionProject.OOperation = oOperation;
         oVersionProject.intVersion = oProject.intVersion;
+        oVersionProject.name = oProject.name;
+        oVersionProject.dt_startProject = oProject.dt_startProject;
+        oVersionProject.dt_endProject = oProject.dt_endProject;
         oVersionProject.description = oOperation.name+" - "+ oProject.name;
         oVersionProject.id_Person = (oProject.OPerson==null)?null:oProject.OPerson.id;
         persist(oVersionProject);

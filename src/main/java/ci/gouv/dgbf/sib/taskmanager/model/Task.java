@@ -24,14 +24,16 @@ public class Task extends AbstractEntity {
     public String description;
     public Float nbreestimatehours;
     public int intVersion;
-    @JoinColumn(name = "id_user", referencedColumnName = "id")
+//    @JoinColumn(name = "id_user", referencedColumnName = "id")
+//    @ManyToOne
+//    public Users OUser;
     @ManyToOne
-    public Users OUser;
-    @ManyToOne
-    @JoinColumn(name = "id_project", referencedColumnName = "id")
-    public Project OProject;
+    @JoinColumn(name = "id_projectPerson", referencedColumnName = "id")
+    public ProjectPerson OProjectPerson;
     @OneToMany(mappedBy = "OTask", fetch = FetchType.LAZY)
     public List<Activity> lstActivities = new ArrayList<>();
+
+    public String p_key_project_id;
 
     @Transient
     public float count_activity;
@@ -47,6 +49,11 @@ public class Task extends AbstractEntity {
                 " }";
     }
 
+    @PrePersist
+    public void initializeEntity() {
+        super.initializeEntity();
+        this.status = ParametersConfig.status_enable;
+    }
 
     public void setTaskCompletionRate(){
         List<Activity> lstActivities = Activity.list("OTask.id = ?1 AND status <> ?2", this.id,ParametersConfig.status_delete);

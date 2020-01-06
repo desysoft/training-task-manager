@@ -1,11 +1,8 @@
 package ci.gouv.dgbf.sib.taskmanager.dao;
 
 import ci.gouv.dgbf.sib.taskmanager.exception.user.UserExistException;
-import ci.gouv.dgbf.sib.taskmanager.model.Task;
-import ci.gouv.dgbf.sib.taskmanager.model.Users;
+import ci.gouv.dgbf.sib.taskmanager.model.User;
 import ci.gouv.dgbf.sib.taskmanager.tools.ParametersConfig;
-import com.sun.org.apache.regexp.internal.RE;
-import io.quarkus.hibernate.orm.panache.PanacheRepository;
 import io.quarkus.hibernate.orm.panache.PanacheRepositoryBase;
 import io.quarkus.panache.common.Parameters;
 
@@ -17,31 +14,31 @@ import java.util.List;
 
 @ApplicationScoped
 @Transactional
-public class UserDao implements PanacheRepositoryBase<Users, String> {
+public class UserDao  extends AbstractDao implements PanacheRepositoryBase<User, String> {
 
 
     @Inject
     TaskDao OTaskDao;
 
-    public List<Users> findAllUser() {
+    public List<User> findAllUser() {
         return list("status", "enable");
     }
 
-    public List<Users> findAllUser(String search_value) {
+    public List<User> findAllUser(String search_value) {
         return find("(firstName LIKE :search_value OR lastName LIKE :search_value OR contact LIKE :search_value) AND status LIKE :status", Parameters.with("search_value", "%" + search_value + "%").and("status", ParametersConfig.status_enable)).list();
     }
 
 
-    public Users findByIdCustom(String id) {
+    public User findByIdCustom(String id) {
         return find("id = ?1 AND status = ?2", id, ParametersConfig.status_enable).firstResult();
     }
 
-    public Users findByLogin(String login) {
+    public User findByLogin(String login) {
         return find("login = ?1 AND status = ?2", login, ParametersConfig.status_enable).firstResult();
     }
 
-    public Users doLogin(String login, String pwd) {
-        Users oUser = Users.find("login  = ?1 AND pwd = ?2 AND status = ?3 ", login, pwd, ParametersConfig.status_enable).firstResult();
+    public User doLogin(String login, String pwd) {
+        User oUser = User.find("login  = ?1 AND pwd = ?2 AND status = ?3 ", login, pwd, ParametersConfig.status_enable).firstResult();
         if (oUser != null) {
             oUser.dt_lastconnection = LocalDateTime.now();
             this.persist(oUser);
@@ -49,21 +46,21 @@ public class UserDao implements PanacheRepositoryBase<Users, String> {
         return oUser;
     }
 
-    public Boolean addUser(Users users, String createdBy) {
+    public Boolean addUser(User user, String createdBy) {
         try {
-            users.status = ParametersConfig.status_enable;
-            users.createdBy = createdBy;
-            this.persist(users);
-            return this.isPersistent(users);
+            user.status = ParametersConfig.status_enable;
+            user.createdBy = createdBy;
+            this.persist(user);
+            return this.isPersistent(user);
         } catch (Exception e) {
             e.printStackTrace();
             return false;
         }
     }
 
-    public Boolean updateUser(Users user, String updatedBy) throws UserExistException {
+    public Boolean updateUser(User user, String updatedBy) throws UserExistException {
         try {
-            Users oUser = this.findByIdCustom(user.id);
+            User oUser = this.findByIdCustom(user.id);
             if (oUser == null) throw new UserExistException("Utilisateur introuvable");
             if (user.lastName != null && !user.lastName.equals(""))
                 oUser.lastName = user.lastName;
@@ -82,12 +79,12 @@ public class UserDao implements PanacheRepositoryBase<Users, String> {
         }
     }
 
-    public Boolean blockUser(Users user, String updatedBy) throws UserExistException {
+    public Boolean blockUser(User user, String updatedBy) throws UserExistException {
         try {
-            Users oUsers = this.findByIdCustom(user.id);
-            if (oUsers == null) throw new UserExistException("Utilisateur introuvable");
-            oUsers.status = ParametersConfig.status_block;
-            oUsers.updatedBy = updatedBy;
+            User oUser = this.findByIdCustom(user.id);
+            if (oUser == null) throw new UserExistException("Utilisateur introuvable");
+            oUser.status = ParametersConfig.status_block;
+            oUser.updatedBy = updatedBy;
             this.persist(user);
             return true;
         } catch (Exception e) {
@@ -96,13 +93,13 @@ public class UserDao implements PanacheRepositoryBase<Users, String> {
         }
     }
 
-    public Boolean deleteUser(Users users, String updatedBy) throws UserExistException {
+    public Boolean deleteUser(User user, String updatedBy) throws UserExistException {
         try {
-            Users oUsers = this.findByIdCustom(users.id);
-            if (oUsers == null) throw new UserExistException("Utilisateur introuvable");
-            oUsers.status = ParametersConfig.status_delete;
-            oUsers.updatedBy = updatedBy;
-            this.persist(oUsers);
+            User oUser = this.findByIdCustom(user.id);
+            if (oUser == null) throw new UserExistException("Utilisateur introuvable");
+            oUser.status = ParametersConfig.status_delete;
+            oUser.updatedBy = updatedBy;
+            this.persist(oUser);
             return true;
         } catch (Exception e) {
             e.printStackTrace();
@@ -110,43 +107,45 @@ public class UserDao implements PanacheRepositoryBase<Users, String> {
         }
     }
 
-    public Boolean assignateTasksToUser(Users user, List<Task> lstTasks, String updatedBy) throws UserExistException {
-        try {
-            Users oUsers = this.findByIdCustom(user.id);
-            if (oUsers == null) throw new UserExistException("Utilisateur introuvable");
-            System.out.println("assignateTaskToUser +++ Taille lstTasks === " + lstTasks.size());
-            for (Task oTask : lstTasks) {
-                System.out.println("oTask === " + oTask);
-                Task oneTask = OTaskDao.findByIdCustom(oTask.id);
-                System.out.println("oneTask === " + oneTask);
-                if (oneTask.OUser == null || oneTask.OUser.id != oUsers.id) {
-                    oneTask.OUser = oUsers;
-                    oneTask.updatedBy = updatedBy;
-                    OTaskDao.persist(oneTask);
-                }
-            }
-            return true;
-        } catch (Exception e) {
-            e.printStackTrace();
-            return false;
-        }
-    }
+//    public Boolean assignateTasksToUser(Users user, List<Task> lstTasks, String updatedBy) throws UserExistException {
+//        try {
+//            Users oUsers = this.findByIdCustom(user.id);
+//            if (oUsers == null) throw new UserExistException("Utilisateur introuvable");
+//            System.out.println("assignateTaskToUser +++ Taille lstTasks === " + lstTasks.size());
+//            for (Task oTask : lstTasks) {
+//                System.out.println("oTask === " + oTask);
+//                Task oneTask = OTaskDao.findByIdCustom(oTask.id).orElse(null);
+//                System.out.println("oneTask === " + oneTask);
+//                if (oneTask.OUser == null || oneTask.OUser.id != oUsers.id) {
+//                    oneTask.OUser = oUsers;
+//                    oneTask.updatedBy = updatedBy;
+//                    OTaskDao.persist(oneTask);
+//                }
+//            }
+//            return true;
+//        } catch (Exception e) {
+//            e.printStackTrace();
+//            return false;
+//        }
+//    }
 
-    public Boolean assignateTaskToUser(Users user, Task task, String updatedBy) throws UserExistException {
-        try {
-            Users oUsers = this.findByIdCustom(user.id);
-            if (oUsers == null) throw new UserExistException("Utilisateur introuvable");
-            Task oTask = OTaskDao.findByIdCustom(task.id);
-            System.out.println("oneTask === " + oTask);
-            if (oTask.OUser == null || oTask.OUser.id != oUsers.id) {
-                oTask.OUser = oUsers;
-                oTask.updatedBy = updatedBy;
-                OTaskDao.persist(oTask);
-            }
-            return true;
-        } catch (Exception e) {
-            e.printStackTrace();
-            return false;
-        }
-    }
+
+
+//    public Boolean assignateTaskToUser(Users user, Task task, String updatedBy) throws UserExistException {
+//        try {
+//            Users oUsers = this.findByIdCustom(user.id);
+//            if (oUsers == null) throw new UserExistException("Utilisateur introuvable");
+//            Task oTask = OTaskDao.findByIdCustom(task.id).orElse(null);
+//            System.out.println("oneTask === " + oTask);
+//            if (oTask.OUser == null || oTask.OUser.id != oUsers.id) {
+//                oTask.OUser = oUsers;
+//                oTask.updatedBy = updatedBy;
+//                OTaskDao.persist(oTask);
+//            }
+//            return true;
+//        } catch (Exception e) {
+//            e.printStackTrace();
+//            return false;
+//        }
+//    }
 }

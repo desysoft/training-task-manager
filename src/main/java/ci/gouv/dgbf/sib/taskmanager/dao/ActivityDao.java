@@ -14,7 +14,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 @ApplicationScoped
-public class ActivityDao implements PanacheRepositoryBase<Activity, String> {
+public class ActivityDao extends AbstractDao implements PanacheRepositoryBase<Activity, String> {
 
     @Inject
     EntityManager em;

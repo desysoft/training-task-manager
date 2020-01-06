@@ -1,12 +1,7 @@
 package ci.gouv.dgbf.sib.taskmanager.model;
 
-import io.quarkus.hibernate.orm.panache.PanacheEntity;
-import org.checkerframework.checker.units.qual.A;
-
 import javax.persistence.*;
-import java.time.LocalDateTime;
 import java.util.List;
-import java.util.UUID;
 
 @Entity
 @Inheritance(strategy = InheritanceType.SINGLE_TABLE)
@@ -17,8 +12,12 @@ public class Person extends AbstractEntity {
     public String lastName;
     public String contact;
 
+
     @OneToMany(mappedBy = "OPerson", fetch = FetchType.LAZY)
     public List<Project> lstProjects;
+
+    @OneToMany(mappedBy = "OPerson")
+    public List<ProjectPerson> lstProjectPerson;
 
     @Override
     public String toString(){

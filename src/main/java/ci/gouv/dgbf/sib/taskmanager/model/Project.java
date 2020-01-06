@@ -19,14 +19,18 @@ public class Project extends AbstractEntity {
     @JoinColumn(name = "id_projectLead", referencedColumnName = "id")
     public Person OPerson;
 
+//    @OneToMany(mappedBy = "OProject")
+//    public List<Task> lstTasks = new ArrayList<>();
+
     @OneToMany(mappedBy = "OProject")
-    public List<Task> lstTasks = new ArrayList<>();
+    public List<ProjectPerson> lstProjectPerson = new ArrayList<>();
+
 
     @Transient
     public float count_task;
 
     @Transient
-    public float projectCompletionRate=0;
+    public float projectCompletionRate = 0;
 
     @Override
     public String toString(){
@@ -51,7 +55,7 @@ public class Project extends AbstractEntity {
 
 
     public void setProjectCompletionRate() {
-        lstTasks = Task.list("OProject.id = ?1 AND status <> ?2", this.id, ParametersConfig.status_delete);
+        List<Task> lstTasks = Task.list("OProjectPerson.OProject.id = ?1 AND status <> ?2", this.id, ParametersConfig.status_delete);
         count_task = lstTasks.size();
         if(count_task>0){
             List<Task> lst = lstTasks.stream().filter(task -> task.status.equals(ParametersConfig.status_complete)).collect(Collectors.toList());

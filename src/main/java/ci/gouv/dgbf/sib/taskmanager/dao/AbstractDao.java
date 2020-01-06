@@ -1,6 +1,27 @@
 package ci.gouv.dgbf.sib.taskmanager.dao;
 
 
-public interface AbstractDao {
-    public int getNextId();
+import javax.persistence.EntityManager;
+
+public abstract class AbstractDao {
+
+    String message;
+    String detailMessage;
+    EntityManager em;
+
+    public String getMessage() {
+        return message;
+    }
+
+    public void setMessage(String message) {
+        this.message = message;
+    }
+
+    public String getDetailMessage() {
+        return detailMessage;
+    }
+
+    public void setDetailMessage(String detailMessage) {
+        this.detailMessage = detailMessage;
+    }
 }

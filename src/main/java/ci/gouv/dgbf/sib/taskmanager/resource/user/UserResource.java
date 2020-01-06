@@ -2,28 +2,20 @@ package ci.gouv.dgbf.sib.taskmanager.resource.user;
 
 
 import ci.gouv.dgbf.sib.taskmanager.dao.TaskDao;
-import ci.gouv.dgbf.sib.taskmanager.exception.user.UserNotCreateException;
-import ci.gouv.dgbf.sib.taskmanager.model.Users;
+import ci.gouv.dgbf.sib.taskmanager.model.User;
+import ci.gouv.dgbf.sib.taskmanager.objectvalue.project.ProjectPersonTasks;
 import ci.gouv.dgbf.sib.taskmanager.objectvalue.UserData;
 import ci.gouv.dgbf.sib.taskmanager.dao.UserDao;
-import ci.gouv.dgbf.sib.taskmanager.exception.user.UserExistException;
 import ci.gouv.dgbf.sib.taskmanager.exception.user.UserNotExistException;
-import ci.gouv.dgbf.sib.taskmanager.model.Task;
-import ci.gouv.dgbf.sib.taskmanager.objectvalue.UserTasks;
-import ci.gouv.dgbf.sib.taskmanager.resource.exception.UtilisateursNonTrouveException;
-import ci.gouv.dgbf.sib.taskmanager.tools.ParametersConfig;
 
 import javax.inject.Inject;
 import javax.transaction.Transactional;
 import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Request;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriBuilder;
 import java.net.URI;
-import java.time.LocalDate;
 import java.util.List;
-import java.util.Optional;
 
 @Path("/user")
 @Produces(MediaType.APPLICATION_JSON)
@@ -34,18 +26,21 @@ public class UserResource {
     @Inject
     UserDao userDao;
 
+    @Inject
+    TaskDao OTaskDao;
+
 
     @GET
     @Path("/find")
-    public List<Users> obtenirListDesUtilisateurs() {
-        List<Users> lst = userDao.findAllUser();
+    public List<User> obtenirListDesUtilisateurs() {
+        List<User> lst = userDao.findAllUser();
         if (lst.isEmpty()) throw new WebApplicationException("Aucun utilisateur créé", Response.noContent().build());
         return lst;
     }
 
     @GET
     @Path("/find/{id}")
-    public Users trouverUtilisateurParId(@PathParam("id") String id) {
+    public User trouverUtilisateurParId(@PathParam("id") String id) {
         try {
             return userDao.findByIdCustom(id);
         } catch (UserNotExistException e) {
@@ -57,23 +52,23 @@ public class UserResource {
 
     @GET
     @Path("/findByLogin/{login}")
-    public Users trouverUtilisateurParLogin(@PathParam("login") String login) {
-        Users ouser = userDao.findByLogin(login);
+    public User trouverUtilisateurParLogin(@PathParam("login") String login) {
+        User ouser = userDao.findByLogin(login);
         if (ouser != null) return ouser;
         else throw new WebApplicationException("Ce login est inexistant", Response.Status.NO_CONTENT);
     }
 
     @GET
     @Path("/search/{value}")
-    public List<Users> RechercherParMotCle(@PathParam("value") String value) {
-        List<Users> lst = userDao.findAllUser(value);
+    public List<User> RechercherParMotCle(@PathParam("value") String value) {
+        List<User> lst = userDao.findAllUser(value);
         if (lst.size() == 0) throw new WebApplicationException("Aucun utilisateur trouvé", Response.Status.NO_CONTENT);
         else return lst;
     }
 
     @POST
     @Path("/add/{createdBy}")
-    public Response ajouterUtilisateur(Users user, @PathParam("createdBy") String createdBy) {
+    public Response ajouterUtilisateur(User user, @PathParam("createdBy") String createdBy) {
         try {
             if (userDao.addUser(user, createdBy)) {
                 URI oUri = UriBuilder.fromPath("/user/find").path("{id}").build(user.id);
@@ -90,9 +85,9 @@ public class UserResource {
 
     @PUT
     @Path("/delete/{updatedBy}")
-    public Response supprimerUtilisateur(Users users, @PathParam("updatedBy") String updatedBy) {
+    public Response supprimerUtilisateur(User user, @PathParam("updatedBy") String updatedBy) {
         try {
-            if (userDao.deleteUser(users, updatedBy))
+            if (userDao.deleteUser(user, updatedBy))
                 return Response.ok().build();
             else return Response.notModified().build();
         } catch (Exception e) {
@@ -103,7 +98,7 @@ public class UserResource {
 
     @PUT
     @Path("/update/{updatedBy}")
-    public Response modifierUnUtilisateur(Users user, @PathParam("updatedBy") String updatedBy) {
+    public Response modifierUnUtilisateur(User user, @PathParam("updatedBy") String updatedBy) {
         try {
             if (userDao.updateUser(user, updatedBy)) {
                 URI oUri = UriBuilder.fromPath("/user/find").path("{id}").build(user.id);
@@ -119,7 +114,7 @@ public class UserResource {
 
     @POST
     @Path("/login")
-    public Users seConnecter(UserData oUserData) {
+    public User seConnecter(UserData oUserData) {
         try {
             return userDao.doLogin(oUserData.getLogin(), oUserData.getPwd());
         } catch (UserNotExistException e) {
@@ -130,11 +125,11 @@ public class UserResource {
 
     @PUT
     @Path("/assignate/{updatedBy}")
-    public Response assignerTachesAUnUtilsateur(UserTasks userTasks,  @PathParam("updatedBy") String updatedBy) {
+    public Response assignerTachesAUnUtilsateur(ProjectPersonTasks projectPersonTasks, @PathParam("updatedBy") String updatedBy) {
         try {
-            if( userDao.assignateTaskToUser(userTasks.getOUser(), userTasks.getLstTasks().get(0), updatedBy))
+//            if( OTaskDao.assignateTaskToPerson( projectPersonTasks.getLstTasks().get(0),projectPersonTasks.getOProjectPerson(), updatedBy))
                 return Response.ok().build();
-            else return Response.notModified().build();
+//            else return Response.notModified().build();
         } catch (Exception e) {
             e.printStackTrace();
             return Response.serverError().build();
@@ -143,11 +138,11 @@ public class UserResource {
 
     @PUT
     @Path("/assignatetasks/{updatedBy}")
-    public Response assignerDesTachesAUnUtilsateur(UserTasks userTasks, @PathParam("updatedBy") String updatedBy) {
+    public Response assignerDesTachesAUnUtilsateur(ProjectPersonTasks projectPersonTasks, @PathParam("updatedBy") String updatedBy) {
         try {
-           if( userDao.assignateTasksToUser(userTasks.getOUser(), userTasks.getLstTasks(), updatedBy))
+//           if( OTaskDao.assignateTaskToPerson(projectPersonTasks.getLstTasks().get(0), projectPersonTasks.getOProjectPerson(), updatedBy))
             return Response.ok().build();
-           else return Response.notModified().build();
+//           else return Response.notModified().build();
         } catch (Exception e) {
             e.printStackTrace();
             return Response.serverError().build();
@@ -156,7 +151,7 @@ public class UserResource {
 
     @PUT
     @Path("block/{updatedBy}")
-    public Response bloquerUtilisateur(Users user, @PathParam("updatedBy") String updatedBy) {
+    public Response bloquerUtilisateur(User user, @PathParam("updatedBy") String updatedBy) {
         try {
             if (userDao.blockUser(user, updatedBy)) {
                 URI oUri = UriBuilder.fromPath("user/find/").path("{id}").build(user.id);

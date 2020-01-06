@@ -14,7 +14,7 @@ import javax.transaction.Transactional;
 import java.util.List;
 
 @ApplicationScoped
-public class VersionTaskDao implements PanacheRepositoryBase<VersionTask, String> {
+public class VersionTaskDao  extends AbstractDao implements PanacheRepositoryBase<VersionTask, String> {
 
     public List<VersionTask> findAllVersionTasks(){
         return find("status = ?1", ParametersConfig.status_enable).list();
@@ -34,7 +34,7 @@ public class VersionTaskDao implements PanacheRepositoryBase<VersionTask, String
         oVersionTask.OOperation = oOperation;
         oVersionTask.intVersion = oTask.intVersion;
         oVersionTask.description = oOperation.name+" - "+ oTask.name;
-        oVersionTask.id_Person = (oTask.OUser==null)?null:oTask.OUser.id;
+        oVersionTask.id_Person = (oTask.OProjectPerson==null)?null:oTask.OProjectPerson.id;
         persist(oVersionTask);
     }
 }

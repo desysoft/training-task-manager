@@ -4,8 +4,12 @@ import ci.gouv.dgbf.sib.taskmanager.dao.ProjectDao;
 import ci.gouv.dgbf.sib.taskmanager.model.Person;
 import ci.gouv.dgbf.sib.taskmanager.model.Project;
 import ci.gouv.dgbf.sib.taskmanager.model.Task;
+import ci.gouv.dgbf.sib.taskmanager.objectvalue.project.ProjectPersonTasks;
+import ci.gouv.dgbf.sib.taskmanager.objectvalue.project.ProjectPersons;
+import com.sun.org.apache.bcel.internal.generic.RET;
 
 import javax.inject.Inject;
+import javax.transaction.Transactional;
 import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
@@ -53,7 +57,7 @@ public class ProjectResource {
 
     @GET
     @Path("personProject/{id_person}")
-    public List<Project> obtenirLesProjetsDeLaPersonne(@PathParam("id_person") String id_person){
+    public List<Project> obtenirLesProjetsDeLaPersonne(@PathParam("id_person") String id_person) {
         return OProjectDao.findAllPersonProjects(id_person);
     }
 
@@ -86,37 +90,58 @@ public class ProjectResource {
     }
 
     @PUT
-    @Path("addtoprojet/{id_project}/task/{id_task}")
-    public Response ajouterTacheAUnProjet(@PathParam("id_project") String id_project, @PathParam("id_task") String id_task) {
+    @Path("assignateTask/{updatedBy}")
+
+    public Response assignerTacheAUnePersonneSurUnProjet(ProjectPersonTasks projectPersonTasks, String updatedBy) {
         try {
-            if (OProjectDao.addTaskInProjet(id_task, id_project)) return Response.ok().build();
-            else return Response.notModified().build();
+            projectPersonTasks.getLstTasks().stream().forEach(task -> {
+                OProjectDao.assignateTaskToPersonInProjet(task, projectPersonTasks.getOPerson(), projectPersonTasks.getOProject());
+                System.out.println("OProjectDao DetailMessage === "+OProjectDao.getDetailMessage());
+            });
+            return Response.ok().build();
         } catch (Exception e) {
             e.printStackTrace();
             return Response.serverError().build();
         }
     }
 
-    @PUT
-    @Path("addTheseTasksToProject/{id_project}")
-    public Response ajouterDesTachesAUnProjet(@PathParam("id_project") String id_project, List<Task> lstTasks){
+    @POST
+    @Path("assignatetoproject/{createdBy}")
+    @Transactional
+    public Response assignerDesPersonnesAUnProjet(ProjectPersons projectPersons, @PathParam("createdBy") String createdBy) {
         try {
-            OProjectDao.addTasksInProjet(lstTasks,id_project);
+            projectPersons.getLstPerson().stream().forEach(person -> {
+                OProjectDao.getOProjectPersonDao().addProjectPerson(projectPersons.getOProject().id, person.id, createdBy);
+            });
             return Response.ok().build();
-        }catch (Exception e){
+        } catch (Exception e) {
             e.printStackTrace();
-            return Response.serverError().build();
+            return Response.serverError().tag(OProjectDao.getDetailMessage()).build();
         }
     }
+
+    @PUT
+//    @Path("addTheseTasksToProject/{id_project}")
+    @Path("addTheseTasksToProject/{updatedBy}")
+    public Response ajouterDesTachesAUnProjet(ProjectPersonTasks projectPersonTasks, @PathParam("updatedBy") String updatedBy) {
+        try {
+            OProjectDao.addTasksInProjet(projectPersonTasks.getLstTasks(), projectPersonTasks.getOProject(), updatedBy);
+            return Response.ok().build();
+        } catch (Exception e) {
+            e.printStackTrace();
+            return Response.serverError().tag(OProjectDao.getDetailMessage()).build();
+        }
+    }
+
     @PUT
     @Path("designate/{id_project}")
-    public Response designerResponsableProjet(@PathParam("id_project") String id_project, Person person){
+    public Response designerResponsableProjet(@PathParam("id_project") String id_project, Person person) {
         try {
-            if(OProjectDao.designateLeadProject(id_project, person)){
+            if (OProjectDao.designateLeadProject(id_project, person)) {
                 URI oUri = UriBuilder.fromPath("project/find").path("{id}").build(id_project);
                 return Response.ok().contentLocation(oUri).build();
-            }else return Response.notModified().build();
-        }catch (Exception e){
+            } else return Response.notModified().build();
+        } catch (Exception e) {
             e.printStackTrace();
             return Response.serverError().build();
         }
