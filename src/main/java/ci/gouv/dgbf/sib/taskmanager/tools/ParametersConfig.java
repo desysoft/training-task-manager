@@ -25,7 +25,9 @@ public class ParametersConfig {
 
     public static String projectNotFoundMessage = "Projet introuvable dans la base de données";
     public static String personNotFoundMessage = "Personne introuvable dans la base de données";
-    public static String genericNotFoundMessage = "introuvable dans la base de données";
+    public static String genericParameterNullMessage = "Paramètre null";
+    public static String genericNotFoundMessage = "Element introuvable";
+    public static String codeAlreadyExist = "Ce code est déja existant";
 
     public static String taskTableNameInApplication = "Tache";
     public static String projectTableNameInApplication = "Projet";
@@ -40,6 +42,7 @@ public class ParametersConfig {
 
 
     public static String id_assignateTaskOperation = "1";
+    public static String id_assignateActivityToTaskOperation = "4";
     public static String id_updateOperation = "2";
     public static String id_choseProjectLeadOperation = "3";
 

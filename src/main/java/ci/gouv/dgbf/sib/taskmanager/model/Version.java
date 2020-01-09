@@ -10,9 +10,11 @@ public class Version extends AbstractEntity {
 
     public String description;
     public int intVersion;
+
     @ManyToOne
     @JoinColumn(name = "id_operation", referencedColumnName = "id")
     public Operation OOperation;
+
     public String id_Person;
 
     @Override

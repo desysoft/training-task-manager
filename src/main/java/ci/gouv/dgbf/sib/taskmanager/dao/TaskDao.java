@@ -4,16 +4,13 @@ import ci.gouv.dgbf.sib.taskmanager.exception.task.TaskNotExistException;
 import ci.gouv.dgbf.sib.taskmanager.model.*;
 import ci.gouv.dgbf.sib.taskmanager.tools.ParametersConfig;
 import ci.gouv.dgbf.sib.taskmanager.exception.operation.OperationNotExistException;
-import com.sun.org.apache.regexp.internal.RE;
+import com.sun.org.apache.bcel.internal.generic.ACONST_NULL;
 import io.quarkus.hibernate.orm.panache.PanacheRepositoryBase;
 import io.quarkus.panache.common.Parameters;
-import org.omg.CORBA.PUBLIC_MEMBER;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
-import javax.persistence.EntityManager;
 import javax.transaction.Transactional;
-import java.time.format.TextStyle;
 import java.util.List;
 import java.util.Optional;
 
@@ -21,8 +18,6 @@ import java.util.Optional;
 @Transactional
 public class TaskDao  extends AbstractDao implements PanacheRepositoryBase<Task, String> {
 
-    @Inject
-    EntityManager em;
 
     @Inject
     OperationDao OOperationDao;
@@ -49,12 +44,12 @@ public class TaskDao  extends AbstractDao implements PanacheRepositoryBase<Task,
     }
 
     public List<Task> findAllByProject(String id_project){
-        List<Task> lstTasks =  em.createQuery("SELECT t FROM Task t WHERE t.OProjectPerson.OProject.id = ?1 AND t.status = ?2")
+        List<Task> lstTasks =  this.getEm().createQuery("SELECT t FROM Task t WHERE t.OProjectPerson.OProject.id = ?1 AND t.status = ?2")
                 .setParameter(1, id_project)
                 .setParameter(2, ParametersConfig.status_enable)
                 .getResultList();
         for(Task t : lstTasks){
-            em.refresh(t);
+            this.getEm().refresh(t);
         }
         return lstTasks;
     }
@@ -64,6 +59,11 @@ public class TaskDao  extends AbstractDao implements PanacheRepositoryBase<Task,
     }
 
     public Optional<Task> findByIdCustom(String id) {
+        if(id==null || id.equals("")){
+            this.setDetailMessage(ParametersConfig.PROCESS_FAILED);
+            this.setDetailMessage(ParametersConfig.genericParameterNullMessage);
+            return null;
+        }
         return find("id = ?1 AND status = ?2", id, ParametersConfig.status_enable).stream().findFirst();
     }
 
@@ -87,6 +87,44 @@ public class TaskDao  extends AbstractDao implements PanacheRepositoryBase<Task,
             return null;
         }
     }
+
+    public Task updateTask(Task task){
+        try {
+            if(task.id==null || task.id.equals("")){
+                this.setMessage(ParametersConfig.PROCESS_FAILED);
+                this.setDetailMessage(ParametersConfig.genericParameterNullMessage);
+                return null;
+            }
+            Task oTask = this.findByIdCustom(task.id).orElse(null);
+            if(oTask==null){
+                this.setMessage(ParametersConfig.PROCESS_FAILED);
+                this.setDetailMessage(ParametersConfig.genericNotFoundMessage);
+                return null;
+            }
+            Operation oOperation = OOperationDao.findByIdCustom(ParametersConfig.id_updateOperation);
+            OVersionTaskDao.addVersionTask(oTask, oOperation);
+            if (task.code != null && !task.code.equals(""))
+                oTask.code = task.code;
+            if (task.name != null && !task.name.equals(""))
+                oTask.name = task.name;
+            if (task.description != null && !task.description.equals(""))
+                oTask.description = task.description;
+            if (task.nbreestimatehours != null && !task.nbreestimatehours.equals(""))
+                oTask.nbreestimatehours = task.nbreestimatehours;
+            if (task.OProjectPerson != null)
+                oTask.OProjectPerson = task.OProjectPerson;
+            this.persist(oTask);
+            this.setMessage(ParametersConfig.PROCESS_SUCCES);
+            this.setDetailMessage(ParametersConfig.SUCCES_UPDATE);
+            return oTask;
+        }catch (Exception e){
+            this.setMessage(ParametersConfig.PROCESS_FAILED);
+            this.setDetailMessage(ParametersConfig.FAILED_UPDATE);
+            e.printStackTrace();
+            return null;
+        }
+    }
+
 
     public Task updateTask(String id_task, String id_operation, Task OTask) throws TaskNotExistException, OperationNotExistException {
         Task oTask = findByIdCustom(id_task).orElse(null);
@@ -112,15 +150,73 @@ public class TaskDao  extends AbstractDao implements PanacheRepositoryBase<Task,
         } else throw new TaskNotExistException("Tâche introuvable");
     }
 
-    public Boolean addActivityInTask(Task OTask, Activity OActivity) {
-        int count_activity = OTask.lstActivities.size();
-        OActivity.OTask = OTask;
-        System.out.println("addActivityInTask count before ==== " + count_activity);
-        OTask.lstActivities.add(OActivity);
-        this.persist(OTask);
-        System.out.println("addActivityInTask count after ==== " + OTask.lstActivities.size());
-        return OTask.lstActivities.size() > count_activity;
+
+    public Task addListActivityInTask(Task task, List<Activity> lstActivities){
+        try {
+            Task oTask = this.findByIdCustom(task.id).orElse(null);
+            if(oTask==null){
+                return null;
+            }
+//            System.out.println("addListActivityInTask ++++ oTask = " +oTask);
+            Operation OOperation = OOperationDao.findByIdCustom(ParametersConfig.id_assignateActivityToTaskOperation);
+            lstActivities.stream().forEach(activity -> {
+//                System.out.println("activity "+activity);
+                Activity oActivity = OActivityDao.findByIdCustom(activity.id).get();
+                if(oActivity!=null) OActivityDao.addActivityInTask(oTask, activity);
+            });
+            this.setMessage(ParametersConfig.PROCESS_SUCCES);
+            this.setDetailMessage(ParametersConfig.SUCCES_UPDATE);
+            return oTask;
+        }catch (Exception e){
+            this.setMessage(ParametersConfig.PROCESS_FAILED);
+            this.setDetailMessage(ParametersConfig.FAILED_UPDATE);
+            e.printStackTrace();
+            return null;
+        }
     }
+
+    public Task addActivityInTask(String id_task, String id_activity) {
+        try {
+
+            Task oTask = this.findByIdCustom(id_task).orElse(null);
+            if(oTask==null){
+                this.setMessage(ParametersConfig.PROCESS_FAILED);
+                this.setDetailMessage("Tache "+ParametersConfig.genericNotFoundMessage);
+                return null;
+            }
+
+            if(id_activity == null || id_activity.equals("")){
+                this.setMessage(ParametersConfig.PROCESS_FAILED);
+                this.setDetailMessage("Activité : "+ParametersConfig.genericParameterNullMessage);
+                return null;
+            }
+            Activity oActivity = Activity.find("id = ?1 AND status = ?2 ", id_activity, ParametersConfig.status_enable).firstResult();
+            if(oActivity==null){
+                this.setMessage(ParametersConfig.PROCESS_FAILED);
+                this.setDetailMessage("Activité : "+ParametersConfig.genericNotFoundMessage);
+                return null;
+            }
+
+            oActivity.OTask = oTask;
+            Activity.persist(oActivity);
+            this.setMessage(ParametersConfig.PROCESS_SUCCES);
+            this.setDetailMessage(ParametersConfig.SUCCES_UPDATE);
+            return oTask;
+        } catch (Exception e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
+
+//    public Boolean addActivityInTask(Task OTask, Activity OActivity) {
+//        int count_activity = OTask.lstActivities.size();
+//        OActivity.OTask = OTask;
+//        System.out.println("addActivityInTask count before ==== " + count_activity);
+//        OTask.lstActivities.add(OActivity);
+//        this.persist(OTask);
+//        System.out.println("addActivityInTask count after ==== " + OTask.lstActivities.size());
+//        return OTask.lstActivities.size() > count_activity;
+//    }
 
 
     public boolean deleteTask(String id) throws TaskNotExistException {

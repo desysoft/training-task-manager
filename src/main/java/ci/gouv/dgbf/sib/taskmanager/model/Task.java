@@ -33,6 +33,9 @@ public class Task extends AbstractEntity {
     @OneToMany(mappedBy = "OTask", fetch = FetchType.LAZY)
     public List<Activity> lstActivities = new ArrayList<>();
 
+    @OneToMany(mappedBy = "OTask")
+    public List<VersionTask> lstVersionTasks  = new ArrayList<>();
+
     public String p_key_project_id;
 
     @Transient

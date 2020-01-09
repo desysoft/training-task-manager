@@ -6,10 +6,15 @@ import javax.persistence.*;
 @DiscriminatorValue("task")
 public class VersionTask extends Version {
 
+
+    public String name;
+    public String description;
+    public Float nbreestimatehours;
+    public String id_ProjectPerson;
+    public String p_key_project_id;
     @ManyToOne
     @JoinColumn(name = "id_task", referencedColumnName = "id")
     public Task OTask;
-    public String description;
 
     @Override
     public String toString(){

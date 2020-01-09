@@ -7,7 +7,9 @@ import ci.gouv.dgbf.sib.taskmanager.exception.task.TaskCodeExistException;
 import ci.gouv.dgbf.sib.taskmanager.model.Activity;
 import ci.gouv.dgbf.sib.taskmanager.model.Task;
 import ci.gouv.dgbf.sib.taskmanager.model.User;
+import ci.gouv.dgbf.sib.taskmanager.objectvalue.task.TaskActivities;
 import ci.gouv.dgbf.sib.taskmanager.resource.exception.TacheNonTrouveException;
+import org.jboss.logging.annotations.Param;
 import org.jboss.resteasy.annotations.jaxrs.PathParam;
 
 
@@ -20,7 +22,7 @@ import javax.ws.rs.core.UriBuilder;
 import java.net.URI;
 import java.util.List;
 
-@Path("/task")
+@Path("/tasks")
 @Produces(MediaType.APPLICATION_JSON)
 @Transactional
 public class TaskResource {
@@ -32,23 +34,21 @@ public class TaskResource {
     ActivityDao OActivityDao;
 
     @GET
-    @Path("find")
     public List<Task> listeDesTaches() {
+        System.out.println("listeDesTaches");
         List<Task> lesTaches = OTaskDao.findAllTask();
         if (lesTaches.isEmpty()) throw new TacheNonTrouveException("Aucune tache n'est encore créée");
         return lesTaches;
     }
 
-    @GET
+    @POST
     @Path("search/{value}")
-    public List<Task> rechercherTacheParMotCle(@PathParam("{value}") String value){
-        List<Task> lstTasks = OTaskDao.findAllTask(value);
-        if (lstTasks.isEmpty()) throw new WebApplicationException("Aucune tâche correspondant au critère de recherche", Response.noContent().build());
-        return lstTasks;
+    public List<Task> rechercherTacheParMotCle(@PathParam("value") String value) {
+        return OTaskDao.findAllTask(value);
     }
 
     @GET
-    @Path("find/{id}")
+    @Path("{id}")
     public Task trouverTacheParSonId(@PathParam("id") String id) {
         Task task = OTaskDao.findByIdCustom(id).orElse(null);
         if (task != null)
@@ -57,12 +57,12 @@ public class TaskResource {
     }
 
     @GET
-    @Path("findByCode/{code}")
+    @Path("/code/{code}")
     public Task trouverTacheParSonCode(@PathParam("code") String code) {
         System.out.println("Resource ++++ trouverTacheParSonCode");
-        Task oTask = OTaskDao.findByCode(code).orElse(null);
-        if (oTask == null) throw new TaskCodeExistException("Code " + code + " introuvable dans la liste des tâches");
-        else return oTask;
+        return OTaskDao.findByCode(code).orElse(null);
+//        if (oTask == null) throw new TaskCodeExistException("Code " + code + " introuvable dans la liste des tâches");
+//        else return oTask;
     }
 
     @GET
@@ -72,59 +72,32 @@ public class TaskResource {
     }
 
     @POST
-    @Path("add")
     public Task ajouterUneTache(Task task) {
         return OTaskDao.addTask(task);
     }
 
     @PUT
-    @Path("update/{id}/operation/{id_operation}")
-    public Response modifierUneTache(@PathParam("id") String id, @PathParam("id_operation") String id_operation, Task OTask) {
-        try {
-            Task oTask = OTaskDao.updateTask(id, id_operation, OTask);
-            if(oTask!=null){
-                URI OUri = UriBuilder.fromPath("/task/find").path("{id}").build(oTask.id);
-                return Response.ok().contentLocation(OUri).build();
-            }else throw new WebApplicationException("Tache introuvable", Response.Status.NO_CONTENT);
-        } catch (Exception e) {
-            e.printStackTrace();
-            return Response.notModified().status(Response.Status.INTERNAL_SERVER_ERROR).build();
-        }
+    public Task modifierUneTache(Task task) {
+        return OTaskDao.updateTask(task);
     }
 
+
+//    @PUT
+//    @Path("{id_tache}/activity/{id_activity}")
+//    public Task ajouterDesActivitesAUneTache(@PathParam("id_tache") String id, @PathParam("id_activity") String id_activity) {
+//        return OTaskDao.addActivityInTask(id, id_activity);
+//    }
 
     @PUT
-    @Path("/assignate/{id_tache}/activity/{id_activity}")
-    public Response assignerActiviteAUneTache(@PathParam("id_tache") String id, @PathParam("id_activity") String id_activity) {
-        Task oTask = OTaskDao.findByIdCustom(id).orElse(null);
-        if (oTask != null) {
-            Activity OActivity = OActivityDao.findByIdCustom(id_activity);
-            if (OActivity != null) {
-                if (!OActivityDao.addActivityInTask(oTask, OActivity))
-                    throw new WebApplicationException("Assignation d'activité à la tache échoué", Response.Status.EXPECTATION_FAILED);
-                else return Response.ok().build();
-            } else throw new WebApplicationException("Activité introuvable", Response.Status.NOT_FOUND);
-        } else throw new WebApplicationException("Tache introuvable", Response.Status.NOT_FOUND);
+    @Path("activities")
+    public Task ajouterDesActivitesAUneTache(TaskActivities taskActivities) {
+        return OTaskDao.addListActivityInTask(taskActivities.getOTask(), taskActivities.getLstActivities());
     }
-
-
-
-
-
 
 
     @DELETE
-    @Path("/delete/{id_tache}")
-    public Response supprimerUneTache(@PathParam("id_tache") String id_tache) {
-        try {
-            if(OTaskDao.deleteTask(id_tache)){
-                return Response.ok().build();
-            }else {
-                return Response.notModified().build();
-            }
-        } catch (Exception e) {
-            System.out.println(e.getMessage());
-            return Response.notModified().status(Response.Status.INTERNAL_SERVER_ERROR).build();
-        }
+    @Path("{id}")
+    public void supprimerUneTache(@PathParam("id") String id) {
+        OTaskDao.deleteTask(id);
     }
 }

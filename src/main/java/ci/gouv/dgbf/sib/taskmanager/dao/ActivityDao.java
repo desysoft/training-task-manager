@@ -1,8 +1,10 @@
 package ci.gouv.dgbf.sib.taskmanager.dao;
 
 import ci.gouv.dgbf.sib.taskmanager.model.Activity;
+import ci.gouv.dgbf.sib.taskmanager.model.Operation;
 import ci.gouv.dgbf.sib.taskmanager.model.Task;
 import ci.gouv.dgbf.sib.taskmanager.tools.ParametersConfig;
+import com.sun.org.apache.regexp.internal.RE;
 import io.quarkus.hibernate.orm.panache.PanacheRepository;
 import io.quarkus.hibernate.orm.panache.PanacheRepositoryBase;
 
@@ -10,82 +12,172 @@ import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 import javax.persistence.EntityManager;
 import javax.persistence.Query;
+import javax.transaction.Transactional;
 import java.util.List;
-import java.util.stream.Collectors;
+import java.util.Optional;
 
 @ApplicationScoped
+@Transactional
 public class ActivityDao extends AbstractDao implements PanacheRepositoryBase<Activity, String> {
 
     @Inject
-    EntityManager em;
+    VersionActivityDao OVersionActivityDao;
 
-    public List<Activity> findAllActivity(){
+    @Inject
+    OperationDao OOperationDao;
+
+//    @Inject
+//    TaskDao OTaskDao;
+
+    public List<Activity> findAllActivity() {
         return find("status <> ?1", ParametersConfig.status_delete).list();
     }
 
-    public Activity findByCode(String code){
-        return find("code =?1 AND status <> ?2", code, ParametersConfig.status_delete).firstResult();
+    public Optional<Activity> findByCode(String code) {
+        if (code == null || code.equals(""))
+            return null;
+        return find("code =?1 AND status <> ?2", code, ParametersConfig.status_delete).stream().findFirst();
     }
 
-    public Activity findByIdCustom(String Id){
-        return find("id = ?1 and status <> ?2 ", Id, ParametersConfig.status_delete).firstResult();
+    public Optional<Activity> findByIdCustom(String id) {
+        System.out.println("findByIdCustom === id "+id);
+        if (id == null || id.equals(""))
+            return null;
+        return find("id = ?1 and status <> ?2 ", id, ParametersConfig.status_delete).stream().findFirst();
     }
 
-    public List<Activity> findAllByTask(String id_tache){
-        return em.createQuery("SELECT t FROM Activity t WHERE t.OTask.id = ?1 AND t.status <> ?2")
+    public List<Activity> findAllByTask(String id_tache) {
+        return this.getEm().createQuery("SELECT t FROM Activity t WHERE t.OTask.id = ?1 AND t.status <> ?2")
                 .setParameter(1, id_tache)
                 .setParameter(2, ParametersConfig.status_delete)
                 .getResultList();
     }
 
-    public List<Activity> findAllByStatus(String status){
+    public Activity addActivity(Activity activity) {
+        try {
+            if (!this.findByCode(activity.code).isPresent()) {
+                activity.status = ParametersConfig.status_enable;
+                this.persist(activity);
+                this.setMessage(ParametersConfig.PROCESS_SUCCES);
+                this.setDetailMessage(ParametersConfig.SUCCES_CREATE);
+                return activity;
+            } else {
+                this.setMessage(ParametersConfig.PROCESS_FAILED);
+                this.setDetailMessage(ParametersConfig.codeAlreadyExist);
+                return null;
+            }
+        } catch (Exception e) {
+            this.setMessage(ParametersConfig.PROCESS_FAILED);
+            this.setDetailMessage(ParametersConfig.FAILED_CREATE);
+            e.printStackTrace();
+            return null;
+        }
+    }
+
+    public List<Activity> findAllByStatus(String status) {
         return Activity.list("status", status);
     }
 
 
-    public Boolean addActivityInTask(Task OTask, Activity OActivity){
+    public Activity addActivityInTask(Task task, Activity activity) {
         try {
-            OActivity.OTask = OTask;
-            this.persist(OActivity);
-            return true;
-        }catch (Exception e){
+            Operation oOperation = OOperationDao.findByIdCustom(ParametersConfig.id_assignateActivityToTaskOperation);
+            OVersionActivityDao.addVersionActivity(activity, oOperation);
+            activity.OTask = task;
+            this.persist(activity);
+            this.setMessage(ParametersConfig.PROCESS_SUCCES);
+            this.setDetailMessage(ParametersConfig.SUCCES_UPDATE);
+            return activity;
+        } catch (Exception e) {
+            this.setMessage(ParametersConfig.PROCESS_FAILED);
+            this.setDetailMessage(ParametersConfig.FAILED_UPDATE);
             e.printStackTrace();
-            return false;
+            return null;
         }
     }
 
-    public boolean deleteActivity(Activity activity){
+
+
+    public boolean deleteActivity(Activity activity) {
         try {
             activity.status = ParametersConfig.status_delete;
             return this.isPersistent(activity);
-        }catch (Exception e){
+        } catch (Exception e) {
             e.printStackTrace();
             return false;
         }
     }
 
-    public boolean deleteActivity(String id){
+    public Boolean deleteActivity(String id) {
         try {
-            Activity oActivity = this.findById(id);
+            if(id==null || id.equals("")){
+                this.setMessage(ParametersConfig.PROCESS_FAILED);
+                this.setDetailMessage(ParametersConfig.genericParameterNullMessage);
+                return false;
+            }
+            Activity oActivity = this.findByIdCustom(id).orElse(null);
+            if(oActivity==null){
+                this.setMessage(ParametersConfig.PROCESS_FAILED);
+                this.setDetailMessage(ParametersConfig.genericNotFoundMessage);
+                return false;
+            }
             oActivity.status = ParametersConfig.status_delete;
-            return this.isPersistent(oActivity);
-        }catch (Exception e){
+            this.persist(oActivity);
+            this.setMessage(ParametersConfig.PROCESS_SUCCES);
+            this.setDetailMessage(ParametersConfig.SUCCES_DELETE);
+            return true;
+        } catch (Exception e) {
+            this.setMessage(ParametersConfig.PROCESS_FAILED);
+            this.setDetailMessage(ParametersConfig.FAILED_DELETE);
             e.printStackTrace();
             return false;
         }
     }
 
-    public Boolean updateActivityCompletionRate(Activity activity, float completionReate){
+    @Transactional
+    public Activity updateActivity(Activity activity) {
         try {
-            Activity oActivity = this.findByIdCustom(activity.id);
-            if(oActivity==null) return false;
+            Activity oActivity = this.findByIdCustom(activity.id).orElse(null);
+            if (oActivity == null) {
+                this.setMessage(ParametersConfig.PROCESS_FAILED);
+                this.setDetailMessage(ParametersConfig.genericNotFoundMessage);
+                return oActivity;
+            }
+            OVersionActivityDao.addVersionActivity(oActivity, OOperationDao.findByIdCustom(ParametersConfig.id_updateOperation));
+            if (oActivity.label != activity.label)
+                oActivity.label = activity.label;
+            if (oActivity.OTask != activity.OTask)
+                oActivity.OTask = activity.OTask;
+            if (oActivity.description != activity.description)
+                oActivity.description = activity.description;
+            if (oActivity.start_date != activity.start_date)
+                oActivity.start_date = activity.start_date;
+            if (oActivity.end_date != activity.end_date)
+                oActivity.end_date = activity.end_date;
+            this.persist(oActivity);
+            this.setMessage(ParametersConfig.PROCESS_SUCCES);
+            this.setDetailMessage(ParametersConfig.SUCCES_UPDATE);
+            return oActivity;
+        } catch (Exception e) {
+            this.setMessage(ParametersConfig.PROCESS_FAILED);
+            this.setDetailMessage(ParametersConfig.FAILED_UPDATE);
+            e.printStackTrace();
+            return null;
+        }
+    }
+
+    public Boolean updateActivityCompletionRate(Activity activity, float completionReate) {
+        try {
+            Activity oActivity = this.findByIdCustom(activity.id).orElse(null);
+            if (oActivity == null) return false;
             oActivity.activityCompletionRate = completionReate;
-            if(completionReate>=100) oActivity.status = ParametersConfig.status_complete;
+            if (completionReate >= 100) oActivity.status = ParametersConfig.status_complete;
             persist(oActivity);
             return true;
-        }catch (Exception e){
+        } catch (Exception e) {
             e.printStackTrace();
             return false;
         }
     }
+
 }

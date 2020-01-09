@@ -19,6 +19,7 @@ public class VersionProject extends Version {
     public String description;
     public LocalDateTime dt_startProject;
     public LocalDateTime dt_endProject;
+    public String id_projectLead;
 
     @Override
     public String toString(){
