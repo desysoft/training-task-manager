@@ -17,6 +17,7 @@ public class Activity extends AbstractEntity {
     public String description;
     public LocalDateTime start_date;
     public LocalDateTime end_date;
+    public int intVersion;
     @ManyToOne
     @JoinColumn(name = "id_task", referencedColumnName = "id")
     public Task OTask;
@@ -33,5 +34,11 @@ public class Activity extends AbstractEntity {
                 ", label="+this.label+
                 ", status="+this.status+
                 " }";
+    }
+
+    @PreUpdate
+    public void setEntityForUpdate() {
+        super.setEntityForUpdate();
+        this.intVersion++;
     }
 }

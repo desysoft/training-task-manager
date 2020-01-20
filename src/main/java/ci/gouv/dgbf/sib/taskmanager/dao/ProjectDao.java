@@ -9,12 +9,9 @@ import io.quarkus.panache.common.Parameters;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
-import javax.persistence.EntityManager;
 import javax.transaction.Transactional;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
-import java.util.function.Function;
 import java.util.stream.Collectors;
 
 @ApplicationScoped
@@ -33,10 +30,9 @@ public class ProjectDao extends AbstractDao implements PanacheRepositoryBase<Pro
     @Inject
     ProjectPersonDao OProjectPersonDao;
 
-    @Inject
-    EntityManager em;
 
     public Optional<Project> findByIdCustom(String id) {
+
         return getProjectWithRateComplteProject(find("id = ?1 AND status = ?2 ", id, ParametersConfig.status_enable).list());
     }
 
@@ -50,12 +46,12 @@ public class ProjectDao extends AbstractDao implements PanacheRepositoryBase<Pro
     }
 
     public List<Task> findAllTasksProject(String id_project) {
-        List<Task> lst = em.createQuery("SELECT t FROM Task t WHERE t.OProjectPerson.OProject.id = ?1 AND t.status = ?2")
+        List<Task> lst = this.getEm().createQuery("SELECT t FROM Task t WHERE t.OProjectPerson.OProject.id = ?1 AND t.status = ?2")
                 .setParameter(1, id_project)
                 .setParameter(2, ParametersConfig.status_enable)
                 .getResultList();
         for (Task t : lst) {
-            em.refresh(t);
+            this.getEm().refresh(t);
         }
         return lst;
     }
@@ -65,13 +61,13 @@ public class ProjectDao extends AbstractDao implements PanacheRepositoryBase<Pro
         return lstProjectPerson.stream().map(projectPerson -> projectPerson.OProject).collect(Collectors.toList());
     }
 
-    public boolean addProject(Project project) {
+    public Project addProject(Project project) {
         try {
             this.persist(project);
-            return this.isPersistent(project);
+            return project;
         } catch (Exception e) {
             e.printStackTrace();
-            return false;
+            return null;
         }
     }
 
@@ -248,6 +244,9 @@ public class ProjectDao extends AbstractDao implements PanacheRepositoryBase<Pro
 //            e.printStackTrace();
 //        }
 //    }
+
+
+
 
     public Boolean designateLeadProject(String id_project, Person person) throws ProjectNotExistException, OperationNotExistException {
         try {

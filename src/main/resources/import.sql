@@ -1,6 +1,8 @@
-Insert into OPERATION (ID,CREATEDBY,DT_CREATED,DT_UPDATED,STATUS,UPDATEDBY,DESCRIPTION,NAME) values ('1',null,null,null,'enable',null,'Modification','Modification');
-Insert into OPERATION (ID,CREATEDBY,DT_CREATED,DT_UPDATED,STATUS,UPDATEDBY,DESCRIPTION,NAME) values ('2',null,null,null,null,null,'Désignation responsable projet','Désignation responsable projet');
-Insert into OPERATION (ID,CREATEDBY,DT_CREATED,DT_UPDATED,STATUS,UPDATEDBY,DESCRIPTION,NAME) values ('3',null,null,null,'enable',null,'Assignation de tache','Assignation de tache');
+Insert into OPERATION (ID,CREATEDBY,DT_CREATED,DT_UPDATED,STATUS,UPDATEDBY,DESCRIPTION,NAME) values ('2',null,null,null,'enable',null,'Modification','Modification');
+Insert into OPERATION (ID,CREATEDBY,DT_CREATED,DT_UPDATED,STATUS,UPDATEDBY,DESCRIPTION,NAME) values ('3',null,null,null,'enable',null,'Désignation responsable projet','Désignation responsable projet');
+Insert into OPERATION (ID,CREATEDBY,DT_CREATED,DT_UPDATED,STATUS,UPDATEDBY,DESCRIPTION,NAME) values ('1',null,null,null,'enable',null,'Assignation de tache','Assignation de tache');
+Insert into OPERATION (ID,CREATEDBY,DT_CREATED,DT_UPDATED,STATUS,UPDATEDBY,DESCRIPTION,NAME) values ('4',null,null,null,'enable',null,'Assigneation activité à une tâche','Assigneation activité à une tâche');
+
 
 
 Insert into PERSON (PERSON_TYPE,ID,CREATEDBY,DT_CREATED,DT_UPDATED,STATUS,UPDATEDBY,CONTACT,FIRSTNAME,LASTNAME,DT_LASTCONNECTION,LOGIN,PWD) values ('user','E9916BB90CAE44E8BCBC249475E3CDA5',null,to_timestamp('26/12/19 14:50:25,411000000','DD/MM/RR HH24:MI:SSXFF'),to_timestamp('26/12/19 14:52:10,613000000','DD/MM/RR HH24:MI:SSXFF'),'enable',null,'05050505','Désiré','Labité',to_timestamp('26/12/19 14:52:10,613000000','DD/MM/RR HH24:MI:SSXFF'),'user','****');

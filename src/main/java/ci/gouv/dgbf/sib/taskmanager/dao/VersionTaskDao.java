@@ -2,15 +2,11 @@ package ci.gouv.dgbf.sib.taskmanager.dao;
 
 import ci.gouv.dgbf.sib.taskmanager.model.Operation;
 import ci.gouv.dgbf.sib.taskmanager.model.Task;
-import ci.gouv.dgbf.sib.taskmanager.model.Version;
 import ci.gouv.dgbf.sib.taskmanager.model.VersionTask;
 import ci.gouv.dgbf.sib.taskmanager.tools.ParametersConfig;
-import io.quarkus.hibernate.orm.panache.PanacheQuery;
 import io.quarkus.hibernate.orm.panache.PanacheRepositoryBase;
-import io.quarkus.panache.common.Sort;
 
 import javax.enterprise.context.ApplicationScoped;
-import javax.transaction.Transactional;
 import java.util.List;
 
 @ApplicationScoped
@@ -33,7 +29,11 @@ public class VersionTaskDao  extends AbstractDao implements PanacheRepositoryBas
         oVersionTask.OTask = oTask;
         oVersionTask.OOperation = oOperation;
         oVersionTask.intVersion = oTask.intVersion;
+        oVersionTask.name = oTask.name;
         oVersionTask.description = oOperation.name+" - "+ oTask.name;
+        oVersionTask.nbreestimatehours = oTask.nbreestimatehours;
+        oVersionTask.id_ProjectPerson = oTask.OProjectPerson.id;
+        oVersionTask.p_key_project_id = oTask.p_key_project_id;
         oVersionTask.id_Person = (oTask.OProjectPerson==null)?null:oTask.OProjectPerson.id;
         persist(oVersionTask);
     }

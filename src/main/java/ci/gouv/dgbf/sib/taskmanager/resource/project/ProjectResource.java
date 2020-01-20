@@ -6,7 +6,6 @@ import ci.gouv.dgbf.sib.taskmanager.model.Project;
 import ci.gouv.dgbf.sib.taskmanager.model.Task;
 import ci.gouv.dgbf.sib.taskmanager.objectvalue.project.ProjectPersonTasks;
 import ci.gouv.dgbf.sib.taskmanager.objectvalue.project.ProjectPersons;
-import com.sun.org.apache.bcel.internal.generic.RET;
 
 import javax.inject.Inject;
 import javax.transaction.Transactional;
@@ -17,7 +16,7 @@ import javax.ws.rs.core.UriBuilder;
 import java.net.URI;
 import java.util.List;
 
-@Path("project")
+@Path("projects")
 @Produces(MediaType.APPLICATION_JSON)
 public class ProjectResource {
 
@@ -25,7 +24,6 @@ public class ProjectResource {
     ProjectDao OProjectDao;
 
     @GET
-    @Path("find")
     public List<Project> listeDesProjets() {
         List<Project> lstProjects = OProjectDao.findAllProject();
         if (lstProjects.isEmpty()) throw new WebApplicationException("Liste vide", Response.noContent().build());
@@ -33,7 +31,7 @@ public class ProjectResource {
     }
 
     @GET
-    @Path("find/{id}")
+    @Path("/{id}")
     public Project trouverProjetParSonId(@PathParam("id") String id) {
         Project oProject = OProjectDao.findByIdCustom(id).orElse(null);
         if (oProject == null) throw new WebApplicationException("Projet introuvable", Response.noContent().build());
@@ -41,7 +39,7 @@ public class ProjectResource {
     }
 
     @GET
-    @Path("search/{search_value}")
+    @Path("?action=search&value={search_value}")
     public List<Project> rechercherProjetParMotCle(@PathParam("search_value") String search_value) {
         List<Project> lstProjects = OProjectDao.findAllProject(search_value);
         if (lstProjects.isEmpty())
@@ -63,16 +61,8 @@ public class ProjectResource {
 
     @POST
     @Path("add")
-    public Response ajouterUnProjet(Project project) {
-        try {
-            if (OProjectDao.addProject(project)) {
-                URI oUri = UriBuilder.fromPath("project/find").path("{id}").build(project.id);
-                return Response.created(oUri).build();
-            } else return Response.notModified().build();
-        } catch (Exception e) {
-            e.printStackTrace();
-            return Response.serverError().build();
-        }
+    public Project ajouterUnProjet(Project project) {
+        return OProjectDao.addProject(project);
     }
 
     @PUT

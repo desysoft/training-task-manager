@@ -24,14 +24,15 @@ public class Task extends AbstractEntity {
     public String description;
     public Float nbreestimatehours;
     public int intVersion;
-//    @JoinColumn(name = "id_user", referencedColumnName = "id")
-//    @ManyToOne
-//    public Users OUser;
     @ManyToOne
     @JoinColumn(name = "id_projectPerson", referencedColumnName = "id")
     public ProjectPerson OProjectPerson;
-    @OneToMany(mappedBy = "OTask", fetch = FetchType.LAZY)
+
+    @OneToMany(mappedBy = "OTask")
     public List<Activity> lstActivities = new ArrayList<>();
+
+    @OneToMany(mappedBy = "OTask")
+    public List<VersionTask> lstVersionTasks  = new ArrayList<>();
 
     public String p_key_project_id;
 
@@ -48,6 +49,8 @@ public class Task extends AbstractEntity {
                 ", name = " + this.name +
                 " }";
     }
+
+
 
     @PrePersist
     public void initializeEntity() {
