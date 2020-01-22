@@ -1,5 +1,7 @@
 package ci.gouv.dgbf.sib.taskmanager.objectvalue;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
+
 import java.io.Serializable;
 
 public class UserData implements Serializable {
@@ -10,6 +12,7 @@ public class UserData implements Serializable {
 
     public UserData() {
     }
+
 
     public UserData(String login, String pwd) {
         this.login = login;

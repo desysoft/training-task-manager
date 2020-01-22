@@ -49,6 +49,21 @@ public class ActivityDao extends AbstractDao implements PanacheRepositoryBase<Ac
                 .getResultList();
     }
 
+    public List<Activity> findAllActivity(String search_value){
+        try {
+            System.out.println("findAllActivity");
+            if(search_value==null || search_value.equals("")) search_value="%%";
+            else search_value="%"+search_value+"%";
+            return this.getEm().createQuery("SELECT t FROM Activity t WHERE (t.label LIKE :search_value OR t.description LIKE :search_value) AND t.status NOT LIKE :status")
+                    .setParameter("search_value", search_value)
+                    .setParameter("status", ParametersConfig.status_delete)
+                    .getResultList();
+        }catch (Exception e){
+            e.printStackTrace();
+        }
+        return null;
+    }
+
     public Activity addActivity(Activity activity) {
         try {
             if (!this.findByCode(activity.code).isPresent()) {

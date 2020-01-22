@@ -26,7 +26,14 @@ public class ActivityResource {
     @GET
     @Path("{id}")
     public Activity trouverActiviteParSonId(@PathParam("id") String id) {
-        return OActivityDao.findByIdCustom(id).get();
+        return OActivityDao.findByIdCustom(id).orElse(null);
+    }
+
+    @GET
+    @Path("/search/{search_value}")
+    public List<Activity> RechercherDesActivies(@PathParam("search_value") String search_value) {
+        System.out.println("RechercherDesActivies");
+        return OActivityDao.findAllActivity(search_value);
     }
 
     @GET

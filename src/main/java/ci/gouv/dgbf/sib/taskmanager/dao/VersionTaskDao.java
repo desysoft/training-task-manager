@@ -32,7 +32,7 @@ public class VersionTaskDao  extends AbstractDao implements PanacheRepositoryBas
         oVersionTask.name = oTask.name;
         oVersionTask.description = oOperation.name+" - "+ oTask.name;
         oVersionTask.nbreestimatehours = oTask.nbreestimatehours;
-        oVersionTask.id_ProjectPerson = oTask.OProjectPerson.id;
+        oVersionTask.id_ProjectPerson = (oTask.OProjectPerson==null)?null:oTask.OProjectPerson.id;
         oVersionTask.p_key_project_id = oTask.p_key_project_id;
         oVersionTask.id_Person = (oTask.OProjectPerson==null)?null:oTask.OProjectPerson.id;
         persist(oVersionTask);
