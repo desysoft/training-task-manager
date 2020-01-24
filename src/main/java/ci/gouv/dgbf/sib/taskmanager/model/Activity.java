@@ -27,6 +27,7 @@ public class Activity extends AbstractEntity {
 
     public float activityCompletionRate;
 
+
     @Override
     public String toString(){
         return "Activity{"+

@@ -57,6 +57,7 @@ public class ProjectResource {
 
     @PUT
     public Project modifierUnProjet(Project project) {
+        System.out.println("modifierUnProjet");
         return OProjectDao.updateProject(project);
     }
 

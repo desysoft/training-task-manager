@@ -29,6 +29,7 @@ public class ParametersConfig {
     public static String personNotFoundMessage = "Personne introuvable dans la base de données";
     public static String genericParameterNullMessage = "Paramètre null";
     public static String genericNotFoundMessage = "Element introuvable";
+    public static String operationNotFoundMessage = "Operation introuvable";
     public static String codeAlreadyExist = "Ce code est déja existant";
 
     public static String taskTableNameInApplication = "Tache";
@@ -53,6 +54,8 @@ public class ParametersConfig {
 
     public static String message_parameter_login_null = "Veuillez renseigner le login SVP";
     public static String message_parameter_pwd_null = "Veuillez renseigner le mot de passe SVP";
+
+    public static String path_log_file = "/var/log/task-manager/";
 
 
 

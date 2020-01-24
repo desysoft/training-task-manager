@@ -3,6 +3,7 @@ package ci.gouv.dgbf.sib.taskmanager.dao;
 
 import javax.inject.Inject;
 import javax.persistence.EntityManager;
+import java.util.logging.Logger;
 
 public abstract class AbstractDao {
 
@@ -10,6 +11,8 @@ public abstract class AbstractDao {
     String detailMessage;
     @Inject
     EntityManager em;
+
+    
 
     public String getMessage() {
         return message;

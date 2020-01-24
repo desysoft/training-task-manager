@@ -1,6 +1,7 @@
 package ci.gouv.dgbf.sib.taskmanager.model;
 
 import ci.gouv.dgbf.sib.taskmanager.tools.ParametersConfig;
+
 import javax.persistence.*;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -19,9 +20,6 @@ public class Project extends AbstractEntity {
     @JoinColumn(name = "id_projectLead", referencedColumnName = "id")
     public Person OPerson;
 
-//    @OneToMany(mappedBy = "OProject")
-//    public List<Task> lstTasks = new ArrayList<>();
-
     @OneToMany(mappedBy = "OProject")
     public List<ProjectPerson> lstProjectPerson = new ArrayList<>();
 
@@ -33,10 +31,10 @@ public class Project extends AbstractEntity {
     public float projectCompletionRate = 0;
 
     @Override
-    public String toString(){
-        return "Project {"+
-                " id = "+this.id+
-                ", name = "+this.name+
+    public String toString() {
+        return "Project {" +
+                " id = " + this.id +
+                ", name = " + this.name +
                 " }";
     }
 
@@ -53,13 +51,12 @@ public class Project extends AbstractEntity {
     }
 
 
-
     public void setProjectCompletionRate() {
         List<Task> lstTasks = Task.list("OProjectPerson.OProject.id = ?1 AND status <> ?2", this.id, ParametersConfig.status_delete);
         count_task = lstTasks.size();
-        if(count_task>0){
+        if (count_task > 0) {
             List<Task> lst = lstTasks.stream().filter(task -> task.status.equals(ParametersConfig.status_complete)).collect(Collectors.toList());
-            projectCompletionRate = lst.size()*100/count_task;
+            projectCompletionRate = lst.size() * 100 / count_task;
         }
     }
 }

@@ -4,16 +4,19 @@ import ci.gouv.dgbf.sib.taskmanager.exception.operation.OperationNotExistExcepti
 import ci.gouv.dgbf.sib.taskmanager.exception.project.ProjectNotExistException;
 import ci.gouv.dgbf.sib.taskmanager.model.*;
 import ci.gouv.dgbf.sib.taskmanager.tools.ParametersConfig;
-import com.sun.org.apache.bcel.internal.generic.RET;
+import ci.gouv.dgbf.sib.taskmanager.tools.log.MyLog;
+import ci.gouv.dgbf.sib.taskmanager.tools.string.ToolString;
 import io.quarkus.hibernate.orm.panache.PanacheRepositoryBase;
 import io.quarkus.panache.common.Parameters;
-import oracle.sql.NUMBER;
+import org.slf4j.ILoggerFactory;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 import javax.transaction.Transactional;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
+import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
 @ApplicationScoped
@@ -32,6 +35,7 @@ public class ProjectDao extends AbstractDao implements PanacheRepositoryBase<Pro
     @Inject
     ProjectPersonDao OProjectPersonDao;
 
+    private static Logger LOGGER = Logger.getLogger(ProjectDao.class.getName());
 
     public Optional<Project> findByIdCustom(String id) {
 
@@ -90,29 +94,35 @@ public class ProjectDao extends AbstractDao implements PanacheRepositoryBase<Pro
 
     public Project updateProject(Project project) {
         try {
+            new MyLog(ProjectDao.class.getName(), false).info("updateProject ==== ");
             Project oProject = this.checkExistProject(project);
             if (oProject == null) return null;
             Operation oOperation = OOperationDao.findByIdCustom(ParametersConfig.id_updateOperation);
-            if (oOperation != null) {
-                OVersionProjectDao.addVersionProject(oProject, oOperation);
-                if (project.name != null && !project.name.equals(""))
-                    oProject.name = project.name;
-                if (project.description != null && !project.description.equals(""))
-                    oProject.description = project.description;
-                if (project.dt_startProject != null && !project.dt_startProject.equals(""))
-                    oProject.dt_startProject = project.dt_startProject;
-                if (project.dt_endProject != null && !project.dt_endProject.equals(""))
-                    oProject.dt_endProject = project.dt_endProject;
-                this.persist(oProject);
-                this.setMessage(ParametersConfig.PROCESS_SUCCES);
-                this.setDetailMessage(ParametersConfig.SUCCES_UPDATE);
-                return oProject;
+            if (oOperation == null) {
+                this.setMessage(ParametersConfig.PROCESS_FAILED);
+                this.setDetailMessage(ParametersConfig.operationNotFoundMessage);
+                new MyLog(ProjectDao.class.getName(), false).info(this.getDetailMessage());
+                return null;
             }
+            OVersionProjectDao.addVersionProject(oProject, oOperation);
+            if (project.name != null && !project.name.equals(""))
+                oProject.name = project.name;
+            if (project.description != null && !project.description.equals(""))
+                oProject.description = project.description;
+            if (project.dt_startProject != null && !project.dt_startProject.equals(""))
+                oProject.dt_startProject = project.dt_startProject;
+            if (project.dt_endProject != null && !project.dt_endProject.equals(""))
+                oProject.dt_endProject = project.dt_endProject;
+            this.persist(oProject);
+            this.setMessage(ParametersConfig.PROCESS_SUCCES);
+            this.setDetailMessage(ParametersConfig.SUCCES_UPDATE);
+            return oProject;
         } catch (Exception e) {
             this.setMessage(ParametersConfig.PROCESS_FAILED);
             this.setDetailMessage(ParametersConfig.FAILED_UPDATE);
-            e.printStackTrace();
+            new MyLog(ProjectDao.class.getName(), true).info(ToolString.getStringByArrayStackTraceElement(e));
         }
+        new MyLog(ProjectDao.class.getName(), false).info("END updateProject!");
         return null;
     }
 
@@ -185,7 +195,7 @@ public class ProjectDao extends AbstractDao implements PanacheRepositoryBase<Pro
                 this.setDetailMessage(ParametersConfig.FAILED_TASK_ALREADY_LINKED_TO_PERSON);
                 return null;
             }
-            if(oTask.p_key_project_id == null || (oTask.p_key_project_id == oProjectPerson.OProject.id)){
+            if (oTask.p_key_project_id == null || (oTask.p_key_project_id == oProjectPerson.OProject.id)) {
                 OTaskDao.getOVersionTaskDao().addVersionTask(oTask, OTaskDao.getOOperationDao().findByIdCustom(ParametersConfig.id_assignateTaskOperation));
                 oTask.OProjectPerson = oProjectPerson;
                 oTask.p_key_project_id = oProjectPerson.OProject.id;
@@ -219,7 +229,7 @@ public class ProjectDao extends AbstractDao implements PanacheRepositoryBase<Pro
                 if (oTask != null) {
                     if (oTask.p_key_project_id == null) {
                         if (oTask.OProjectPerson == null || (oTask.OProjectPerson != null && oTask.OProjectPerson.OProject.id == project.id)) {
-                            OTaskDao.getOVersionTaskDao().addVersionTask(oTask,OOperationDao.findByIdCustom(ParametersConfig.id_assignateTaskToProject));
+                            OTaskDao.getOVersionTaskDao().addVersionTask(oTask, OOperationDao.findByIdCustom(ParametersConfig.id_assignateTaskToProject));
                             oTask.p_key_project_id = project.id;
                             oTask.updatedBy = updatedBy;
                             oTask.persist();
@@ -229,7 +239,7 @@ public class ProjectDao extends AbstractDao implements PanacheRepositoryBase<Pro
                 }
             });
             this.setMessage(ParametersConfig.PROCESS_SUCCES);
-            this.setDetailMessage(succes[0] + "/"+ lstTasks.size() + " " + ParametersConfig.SUCCES_LINKED);
+            this.setDetailMessage(succes[0] + "/" + lstTasks.size() + " " + ParametersConfig.SUCCES_LINKED);
             oProject.setProjectCompletionRate();
             return oProject;
         } catch (Exception e) {

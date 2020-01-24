@@ -1,19 +1,11 @@
 package ci.gouv.dgbf.sib.taskmanager.model;
 
 import ci.gouv.dgbf.sib.taskmanager.tools.ParametersConfig;
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import io.quarkus.hibernate.orm.panache.PanacheEntity;
-import io.quarkus.hibernate.orm.panache.PanacheEntityBase;
-import org.checkerframework.checker.units.qual.A;
 
-import javax.annotation.PostConstruct;
 import javax.persistence.*;
-import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.UUID;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 
 @Entity
